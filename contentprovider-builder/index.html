@@ -9,7 +9,7 @@
 </script>
 
 <script type="text/html" id="contract_static_field_tmpl">
-	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName%>";\n
+	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName%.toLowerCase()>";\n
 </script>
 
 
@@ -433,12 +433,12 @@ public class <%=contractName%> {\n
 		/**\n
 		 * The MIME type of a {@link #CONTENT_URI} single item.\n
 		 */\n
-		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.npike.<%=tableName%>";\n
+		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.npike.<%=tableName.toLowerCase()%>";\n
 \n
 		/**\n
 		 * The MIME type of a {@link #CONTENT_URI} a list of items.\n
 		 */\n
-		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.npike.<%=tableName%>";\n
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.npike.<%=tableName.toLowerCase()%>";\n
 \n
 		/**\n
 		 * The content:// style URL for this table\n
