@@ -13,6 +13,407 @@
 </script>
 
 
+<script type="text/html" id="provider_class_tmpl"> 
+<pre>
+import java.util.ArrayList;\n
+import java.util.HashMap;\n
+import java.util.HashSet;\n
+import java.util.LinkedList;\n
+import java.util.Locale;\n
+import java.util.Set;\n
+\n
+import android.content.ContentProvider;\n
+import android.content.ContentProviderOperation;\n
+import android.content.ContentProviderResult;\n
+import android.content.ContentUris;\n
+import android.content.ContentValues;\n
+import android.content.Context;\n
+import android.content.OperationApplicationException;\n
+import android.content.UriMatcher;\n
+import android.database.Cursor;\n
+import android.database.sqlite.SQLiteDatabase;\n
+import android.database.sqlite.SQLiteOpenHelper;\n
+import android.database.sqlite.SQLiteQueryBuilder;\n
+import android.net.Uri;\n
+import android.provider.BaseColumns;\n
+import android.text.TextUtils;\n
+import android.util.Log;\n
+\n
+import com.cw.fullepisodes.android.BuildConfig;\n
+\n
+/**\n
+ * Provides access to a database of MaaS <%=tableName%>.\n
+ */\n
+public class <%=providerName%> extends ContentProvider {\n
+\n
+	private volatile boolean mNotificationsSuspended;\n
+	private LinkedList<Uri> mSuspendedNotifications = new LinkedList<Uri>();\n
+	private Set<Uri> mSuspendedNotificationsSet = new HashSet<Uri>();\n
+\n
+	static class ProviderDatabaseHelper extends SQLiteOpenHelper {\n
+		/**\n
+		 * The database that the provider uses as its underlying data store\n
+		 */\n
+		private static final String DATABASE_NAME = "<%=providerName%>.db";\n
+		/**\n
+		 * The database version\n
+		 */\n
+		private static final int DATABASE_VERSION = 1;\n
+		@SuppressWarnings("unused")\n
+		private Context mContext;\n
+\n
+		/**\n
+		 * Creates a new DatabaseHelper\n
+		 * \n
+		 * @param context\n
+		 *            context of this database\n
+		 */\n
+		ProviderDatabaseHelper(final Context context) {\n
+			super(context, DATABASE_NAME, null, DATABASE_VERSION);\n
+			mContext = context;\n
+		}\n
+\n
+		/**\n
+		 * Creates the underlying database with table name and column names\n
+		 * taken from the ColorContract class.\n
+		 */\n
+		@Override\n
+		public void onCreate(final SQLiteDatabase db) {\n
+			if (BuildConfig.DEBUG) {\n
+				Log.d(<%=providerName%>.class.getSimpleName(), "Creating the "\n
+						+ <%=contractName%>.<%=tableName%>.TABLE_NAME + " table");\n
+			}\n
+\n
+			<%=tableSql%>
+\n
+		}\n
+\n
+		/**\n
+		 * \n
+		 * Demonstrates that the provider must consider what happens when the\n
+		 * underlying database is changed.\n
+		 */\n
+		@Override\n
+		public void onUpgrade(final SQLiteDatabase db, final int oldVersion,\n
+				final int newVersion) {\n
+			Log.w(<%=providerName%>.class.getSimpleName(),\n
+					"Upgrading database from version " + oldVersion + " to "\n
+							+ newVersion + ", which will destroy all old data");\n
+			// db.execSQL("DROP TABLE IF EXISTS " +\n
+			// <%=contractName%>.<%=tableName%>.TABLE_NAME);\n
+\n
+			this.onCreate(db);\n
+		}\n
+	}\n
+\n
+	/**\n
+	 * A UriMatcher instance\n
+	 */\n
+	private static final UriMatcher uriMatcher = <%=providerName%>\n
+			.buildUriMatcher();\n
+\n
+	private static final int <%=tableName.toUpperCase()%>_ID = 2;\n
+	private static final int <%=tableName.toUpperCase()%> = 1;\n
+\n
+	/**\n
+	 * Creates and initializes the URI matcher\n
+	 * \n
+	 * @return the URI Matcher\n
+	 */\n
+	private static UriMatcher buildUriMatcher() {\n
+		final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);\n
+\n
+		matcher.addURI(<%=contractName%>.AUTHORITY, "<%=tableName%>",\n
+				<%=providerName%>.<%=tableName.toUpperCase()%>);\n
+\n
+		matcher.addURI(<%=contractName%>.AUTHORITY, "<%=tableName%>/#",\n
+				<%=providerName%>.<%=tableName.toUpperCase()%>_ID);\n
+\n
+		return matcher;\n
+	}\n
+\n
+	/**\n
+	 * Handle to a new DatabaseHelper.\n
+	 */\n
+	private ProviderDatabaseHelper databaseHelper;\n
+\n
+	@Override\n
+	public int delete(final Uri uri, final String where,\n
+			final String[] whereArgs) {\n
+		// Opens the database object in "write" mode.\n
+		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
+		int count;\n
+		// Does the delete based on the incoming URI pattern.\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%>:\n
+			// If the incoming pattern matches the general pattern for makes,\n
+			// does a delete based on the\n
+			// incoming "where" columns and arguments.\n
+			count = db.delete(<%=contractName%>.<%=modelName%>.TABLE_NAME, where,\n
+					whereArgs);\n
+			break;\n
+		default:\n
+			throw new IllegalArgumentException("Unknown URI " + uri);\n
+		}\n
+		getContext().getContentResolver().notifyChange(uri, null);\n
+		return count;\n
+	}\n
+\n
+	@Override\n
+	public String getType(final Uri uri) {\n
+		/**\n
+		 * Chooses the MIME type based on the incoming URI pattern\n
+		 */\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%>:\n
+			// If the pattern is for makess, returns the general content type.\n
+			return <%=contractName%>.<%=modelName%>.CONTENT_TYPE;\n
+		case SEGMENT_ID:\n
+			// If the pattern is for make IDs, returns the make ID content\n
+			// type.\n
+			return <%=contractName%>.<%=modelName%>.CONTENT_ITEM_TYPE;\n
+\n
+		default:\n
+			throw new IllegalArgumentException("Unknown URI " + uri);\n
+		}\n
+	}\n
+\n
+	@Override\n
+	public Uri insert(final Uri uri, final ContentValues initialValues) {\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%>:\n
+			// insert a specific make\n
+			return insert<%=modelName%>(uri, initialValues);\n
+		default:\n
+			throw new IllegalArgumentException("Unknown URI " + uri);\n
+		}\n
+	}\n
+\n
+	private Uri insert<%=modelName%>(final Uri uri, final ContentValues initialValues) {\n
+		ContentValues values;\n
+		if (initialValues != null) {\n
+			values = new ContentValues(initialValues);\n
+		} else {\n
+			values = new ContentValues();\n
+		}\n
+\n
+		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
+\n/**
+		//String selection = <%=contractName%>.<%=modelName%>.COLUMN_NAME_SEGMENT_NAME\n
+				+ "=? OR " + <%=contractName%>.<%=modelName%>.COLUMN_NAME_SEGMENT_ID\n
+				+ " =?";\n
+		String[] selectionArgs = new String[] {\n
+				values.getAsString(<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME),\n
+				values.getAsString(<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID) };\n
+\n
+		// Do an update if the constraints match\n
+		db.update(<%=contractName%>.<%=tableName%>.TABLE_NAME, values, selection,\n
+				selectionArgs);\n
+\n
+		final long rowId = db.insertWithOnConflict(\n
+				<%=contractName%>.<%=tableName%>.TABLE_NAME,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME, values,\n
+				SQLiteDatabase.CONFLICT_IGNORE);\n
+		// If the insert succeeded, the row ID exists.\n
+		if (rowId > 0) {\n
+			// Creates a URI with the make ID pattern and the new row ID\n
+			// appended to it.\n
+			final Uri inserUri = ContentUris.withAppendedId(\n
+					<%=contractName%>.<%=tableName%>.CONTENT_ID_URI_BASE, rowId);\n
+\n
+			notifyChange(uri);\n
+\n
+			return inserUri;\n
+		}\n
+		**/
+		return uri;\n
+\n
+	}\n
+\n
+	/**\n
+	 * Creates the underlying DatabaseHelper\n
+	 * \n
+	 * @see android.content.ContentProvider#onCreate()\n
+	 */\n
+	@Override\n
+	public boolean onCreate() {\n
+		databaseHelper = new ProviderDatabaseHelper(getContext());\n
+		return true;\n
+	}\n
+\n
+	@Override\n
+	public Cursor query(final Uri uri, final String[] projection,\n
+			final String selection, final String[] selectionArgs,\n
+			final String sortOrder) {\n
+\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%>:\n
+		case <%=tableName.toUpperCase()%>_ID:\n
+			// insert a specific make\n
+			return query<%=modelName%>(uri, projection, selection, selectionArgs,\n
+					sortOrder);\n
+		default:\n
+			return null;\n
+		}\n
+\n
+	}\n
+\n
+	private Cursor query<%=modelName%>(final Uri uri, final String[] projection,\n
+			final String selection, final String[] selectionArgs,\n
+			final String sortOrder) {\n
+		// Constructs a new query builder and sets its table name\n
+		/**
+		final SQLiteQueryBuilder qb = new SQLiteQueryBuilder();\n
+		qb.setTables(<%=contractName%>.<%=tableName%>.TABLE_NAME);\n
+		final HashMap<String, String> allColumnProjectionMap = new HashMap<String, String>();\n
+		allColumnProjectionMap.put(BaseColumns._ID, BaseColumns._ID);\n
+		allColumnProjectionMap.put(\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID);\n
+		allColumnProjectionMap.put(\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME);\n
+		allColumnProjectionMap.put(\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_IS_SUBSCRIBED,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_IS_SUBSCRIBED);\n
+		allColumnProjectionMap.put(\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_NAME,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_NAME);\n
+		allColumnProjectionMap.put(\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_THUMB,\n
+				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_THUMB);\n
+\n
+		qb.setProjectionMap(allColumnProjectionMap);\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName%>:\n
+			break;\n
+		case SEGMENT_ID:\n
+			// If the incoming URI is for a single make identified by its ID,\n
+			// appends "_ID = <makeID>"\n
+			// to the where clause, so that it selects that single make\n
+			qb.appendWhere(BaseColumns._ID\n
+					+ "="\n
+					+ uri.getPath<%=tableName%>().get(\n
+							<%=contractName%>.<%=tableName%>.ID_PATH_POSITION));\n
+			break;\n
+		}\n
+		String orderBy;\n
+		if (TextUtils.isEmpty(sortOrder)) {\n
+			orderBy = <%=contractName%>.<%=tableName%>.DEFAULT_SORT_ORDER;\n
+		} else {\n
+			orderBy = sortOrder;\n
+		}\n
+		final SQLiteDatabase db = databaseHelper.getReadableDatabase();\n
+		final Cursor c = qb.query(db, projection, selection, selectionArgs,\n
+				null, null, orderBy);\n
+		c.setNotificationUri(getContext().getContentResolver(), uri);\n
+		return c;\n
+		**/
+	}\n
+\n
+	@Override\n
+	public int update(final Uri uri, final ContentValues values,\n
+			final String selection, final String[] selectionArgs) {\n
+\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%>:\n
+		case <%=tableName.toUpperCase()%>_ID:\n
+			// insert a specific make\n
+			return update<%=modelName%>(uri, values, selection, selectionArgs);\n
+		default:\n
+			return 0;\n
+		}\n
+	}\n
+\n
+	private int update<%=modelName%>(final Uri uri, final ContentValues values,\n
+			final String selection, final String[] selectionArgs) {\n
+\n
+		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
+		int count = 0;\n
+		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
+		case <%=tableName.toUpperCase()%> :\n
+			// If the incoming URI matches the general makes pattern, does the\n
+			// update based on the incoming\n
+			// data.\n
+			count = db.update(<%=contractName%>.<%=tableName%>.TABLE_NAME, values,\n
+					selection, selectionArgs);\n
+			break;\n
+		case <%=tableName.toUpperCase()%>_ID:\n
+			// If the incoming URI matches a single make ID, does the update\n
+			// based on the incoming data, but\n
+			// modifies the where clause to restrict it to the particular make\n
+			// ID.\n
+			String finalWhere = BaseColumns._ID\n
+					+ " = "\n
+					+ uri.getPath<%=tableName%>().get(\n
+							<%=contractName%>.<%=modelName%>.ID_PATH_POSITION);\n
+			// If there were additional selection criteria, append them to the\n
+			// final WHERE clause\n
+			if (selection != null) {\n
+				finalWhere = finalWhere + " AND " + selection;\n
+			}\n
+			count = db.update(<%=contractName%>.<%=modelName%>.TABLE_NAME, values,\n
+					finalWhere, selectionArgs);\n
+			break;\n
+		default:\n
+			throw new IllegalArgumentException("Unknown URI " + uri);\n
+		}\n
+		notifyChange(uri);\n
+		return count;\n
+	}\n
+\n
+	@Override\n
+	public ContentProviderResult[] applyBatch(\n
+			ArrayList<ContentProviderOperation> operations)\n
+			throws OperationApplicationException {\n
+		setNotificationsSuspended(true);\n
+		databaseHelper.getWritableDatabase().beginTransaction();\n
+		ContentProviderResult[] result = null;\n
+		try {\n
+			result = super.applyBatch(operations);\n
+			databaseHelper.getWritableDatabase().setTransactionSuccessful();\n
+		} finally {\n
+			databaseHelper.getWritableDatabase().endTransaction();\n
+		}\n
+		setNotificationsSuspended(false);\n
+		return result;\n
+	}\n
+\n
+	protected void setNotificationsSuspended(boolean suspended) {\n
+		mNotificationsSuspended = suspended;\n
+		if (!suspended) {\n
+			notifyOutstandingChanges();\n
+		}\n
+	}\n
+\n
+	protected void notifyOutstandingChanges() {\n
+		Uri uri;\n
+		while ((uri = mSuspendedNotifications.poll()) != null) {\n
+			getContext().getContentResolver().notifyChange(uri, null);\n
+			mSuspendedNotificationsSet.remove(uri);\n
+		}\n
+	}\n
+\n
+	protected void notifyChange(Uri uri) {\n
+		if (mNotificationsSuspended) {\n
+			synchronized (mSuspendedNotificationsSet) {\n
+				if (mSuspendedNotificationsSet.contains(uri)) {\n
+					mSuspendedNotifications.remove(uri);\n
+				}\n
+				mSuspendedNotifications.add(uri);\n
+				mSuspendedNotificationsSet.add(uri);\n
+			}\n
+		} else {\n
+			getContext().getContentResolver().notifyChange(uri, null);\n
+		}\n
+	}\n
+\n 
+\n
+}\n
+\n
+</pre>
+</script>
+
 <script type="text/html" id="contract_class_tmpl"> 
 <pre>
 import android.net.Uri;\n
@@ -154,7 +555,11 @@ function buildTable() {
 	$("#output").html(outerClass)
 
 
+
 	// build provider class
+	var tableSql ="db.exec..."
+	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val()}
+	$("#provider_output").html(tmpl("provider_class_tmpl", providerData))
 }
 </script>
 </head>
@@ -180,7 +585,7 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 
 
 <h3>Contract Output</h3>
-<div id="output" style="background:#CCCCCC"/>
+<div id="output" style="background:#CCCCCC"></div>
 
 <h3>Provider Output</h3>
 <div id="provider_output" style="background:#CCCCCC"/>
