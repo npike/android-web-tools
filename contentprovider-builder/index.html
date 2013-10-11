@@ -2,7 +2,126 @@
 <head>
 <title>ContentProvider Builder</title>
 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
+
+
+<script type="text/html" id="new_field_tmpl">
+<p><label for="var<%=varCount%>">Field <%=varCount%>: </label><input type="text" name="field_<%=varCount%>" id="field<%=varCount%>"><select id="field_type<%=varCount%>"><option value="numeric">numeric</option><option value="text">text</option></select><span class="removeVar">Remove Field</span></p>
+</script>
+
+<script type="text/html" id="contract_static_field_tmpl">
+	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName%>";\n
+</script>
+
+
+<script type="text/html" id="contract_class_tmpl"> 
+<pre>
+import android.net.Uri;\n
+import android.provider.BaseColumns;\n
+\n
+public class <%=contractName%> {\n
+	public static final class <%=modelName%> implements BaseColumns {\n
+\n
+<%=staticFields%>
+
+		/**\n
+		 * The content URI base for a single item. Callers must append a numeric\n
+		 * segment id to this Uri to retrieve an item\n
+		 */\n
+		public static final Uri CONTENT_ID_URI_BASE = Uri.parse(<%=contractName%>.SCHEME + <%=contractName%>.AUTHORITY\n
+				+ "/" + <%=modelName%>.TABLE_NAME + "/");\n
+		/**\n
+		 * The MIME type of a {@link #CONTENT_URI} single item.\n
+		 */\n
+		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.npike.<%=tableName%>";\n
+\n
+		/**\n
+		 * The MIME type of a {@link #CONTENT_URI} a list of items.\n
+		 */\n
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.npike.<%=tableName%>";\n
+\n
+		/**\n
+		 * The content:// style URL for this table\n
+		 */\n
+		public static final Uri CONTENT_URI = Uri.parse(<%=contractName%>.SCHEME + <%=contractName%>.AUTHORITY + "/"\n
+				+ <%=modelName%>.TABLE_NAME);\n
+		/**\n
+		 * The default sort order for this table\n
+		 */\n
+		public static final String DEFAULT_SORT_ORDER = <%=modelName%>.COLUMN_NAME_SEGMENT_NAME + " ASC";\n
+		/**\n
+		 * The table name offered by this provider\n
+		 */\n
+		public static final String TABLE_NAME = "<%=tableName%>";\n
+		/**\n
+		 * 0-relative position of a make ID segment in the path part of a make\n
+		 * ID URI\n
+		 */\n
+		public static final int ID_PATH_POSITION = 1;\n
+\n
+		/**\n
+		 * This class cannot be instantiated\n
+		 */\n
+		private <%=modelName%>() {\n
+		}\n
+	}\n
+\n
+	/**\n
+	 * Base authority for this content provider\n
+	 */\n
+	public static final String AUTHORITY = "<%=authority%>";\n
+	/**\n
+	 * The scheme part for this provider's URI\n
+	 */\n
+	private static final String SCHEME = "content://";\n
+\n
+	/**\n
+	 * This class cannot be instantiated\n
+	 */\n
+	private <%=contractName%>() {\n
+	}\n
+}\n
+</pre>
+</script>
+
 <script type="text/javascript">
+
+// Simple JavaScript Templating
+// John Resig - http://ejohn.org/ - MIT Licensed
+(function(){
+  var cache = {};
+ 
+  this.tmpl = function tmpl(str, data){
+    // Figure out if we're getting a template, or if we need to
+    // load the template - and be sure to cache the result.
+    var fn = !/\W/.test(str) ?
+      cache[str] = cache[str] ||
+        tmpl(document.getElementById(str).innerHTML) :
+     
+      // Generate a reusable function that will serve as a template
+      // generator (and which will be cached).
+      new Function("obj",
+        "var p=[],print=function(){p.push.apply(p,arguments);};" +
+       
+        // Introduce the data as local variables using with(){}
+        "with(obj){p.push('" +
+       
+        // Convert the template into pure JavaScript
+        str
+          .replace(/[\r\t\n]/g, " ")
+          .split("<%").join("\t")
+          .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+          .replace(/\t=(.*?)%>/g, "',$1,'")
+          .split("\t").join("');")
+          .split("%>").join("p.push('")
+          .split("\r").join("\\'")
+      + "');}return p.join('');");
+   
+    // Provide some basic currying to the user
+    return data ? fn( data ) : fn;
+  };
+})();
+
+
 
 function capitaliseFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -22,75 +141,20 @@ function buildTable() {
 
 	for (var x = 1; x <= varCount; x++) {
 		var fieldName = $("#field"+x).val(); 
-		tempOutput += "		public static final String COLUMN_NAME_"+fieldName.toUpperCase()+" = \""+fieldName+"\";\n";
+
+		var data={fieldName: fieldName, upperFieldName: fieldName.toUpperCase()} 
+		tempOutput += tmpl("contract_static_field_tmpl", data);
 	}
 
 
-	var outerClass = "import android.net.Uri;\n\
-import android.provider.BaseColumns;\n\
-\n\
-public class "+contractName+" {\n\
-	public static final class "+tableName+" implements BaseColumns {\n\
-\n"+tempOutput+"\n\
-		/**\n\
-		 * The content URI base for a single item. Callers must append a numeric\n\
-		 * segment id to this Uri to retrieve an item\n\
-		 */\n\
-		public static final Uri CONTENT_ID_URI_BASE = Uri.parse("+contractName+".SCHEME + "+contractName+".AUTHORITY\n\
-				+ \"/\" + "+tableName+".TABLE_NAME + \"/\");\n\
-		/**\n\
-		 * The MIME type of a {@link #CONTENT_URI} single item.\n\
-		 */\n\
-		public static final String CONTENT_ITEM_TYPE = \"vnd.android.cursor.item/vnd.npike."+$("#table_name").val()+"\";\n\
-\n\
-		/**\n\
-		 * The MIME type of a {@link #CONTENT_URI} a list of items.\n\
-		 */\n\
-		public static final String CONTENT_TYPE = \"vnd.android.cursor.dir/vnd.npike."+$("#table_name").val()+"\";\n\
-\n\
-		/**\n\
-		 * The content:// style URL for this table\n\
-		 */\n\
-		public static final Uri CONTENT_URI = Uri.parse("+contractName+".SCHEME + "+contractName+".AUTHORITY + \"/\"\n\
-				+ Segments.TABLE_NAME);\n\
-		/**\n\
-		 * The default sort order for this table\n\
-		 */\n\
-		public static final String DEFAULT_SORT_ORDER = "+tableName+".COLUMN_NAME_SEGMENT_NAME + \" ASC\";\n\
-		/**\n\
-		 * The table name offered by this provider\n\
-		 */\n\
-		public static final String TABLE_NAME = \""+$("#table_name").val()+"\";\n\
-		/**\n\
-		 * 0-relative position of a make ID segment in the path part of an item\n\
-		 * ID URI\n\
-		 */\n\
-		public static final int ID_PATH_POSITION = 1;\n\
-\n\
-		/**\n\
-		 * This class cannot be instantiated\n\
-		 */\n\
-		private "+tableName+"() {\n\
-		}\n\
-	}\n\
-	/**\n\
- 	* Base authority for this content provider\n\
-	 */\n\
-	public static final String AUTHORITY = \""+$("#input_cp_authority").val()+"\";\n\
-	/**\n\
-	 * The scheme part for this provider's URI\n\
-	 */\n\
-	private static final String SCHEME = \"content://\";\n\
-\n\
-	/**\n\
-	 * This class cannot be instantiated\n\
- 	*/\n\
-	private "+contractName+"() {\n\
-	}\n\
-}";
+	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("input_cp_authority").val(), staticFields: tempOutput}
+	var outerClass = tmpl("contract_class_tmpl", data)
 
 
-	$("#output").text(outerClass)
+	$("#output").html(outerClass)
+
+
+	// build provider class
 }
 </script>
 </head>
@@ -116,10 +180,10 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 
 
 <h3>Contract Output</h3>
-<pre id="output" style="background:#CCCCCC"/>
+<div id="output" style="background:#CCCCCC"/>
 
 <h3>Provider Output</h3>
-<pre id="provider_output" style="background:#CCCCCC"/>
+<div id="provider_output" style="background:#CCCCCC"/>
 
 <script type="text/javascript">
 
@@ -127,7 +191,10 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 	//add a new node
 	$('#addField').on('click', function(){
 	varCount++;
-	$node = '<p><label for="var'+varCount+'">Field '+varCount+': </label><input type="text" name="field_'+varCount+'" id="field'+varCount+'"><select id="field_type'+varCount+'"><option value="\numeric\">numeric</option><option value="\text\">text</option></select><span class="removeVar">Remove Field</span></p>';
+	// $node = '<p><label for="var'+varCount+'">Field '+varCount+': </label><input type="text" name="field_'+varCount+'" id="field'+varCount+'"><select id="field_type'+varCount+'"><option value="\numeric\">numeric</option><option value="\text\">text</option></select><span class="removeVar">Remove Field</span></p>';
+
+	var data={varCount: varCount}
+	$node = tmpl("new_field_tmpl", data)
 	$(this).parent().before($node);
 	});
 
