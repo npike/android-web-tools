@@ -1,0 +1,136 @@
+<html>
+<head>
+<title>ContentProvider Builder</title>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
+<script type="text/javascript">
+
+function capitaliseFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function buildTable() {
+	console.log(varCount)
+	console.log($("#table_name").val())
+
+	var tempOutput = ""
+	var contractName = $("#input_cp_name").val() + "Contract"
+	var tableName = capitaliseFirstLetter($("#table_name").val())
+
+	
+
+	
+
+	for (var x = 1; x <= varCount; x++) {
+		var fieldName = $("#field"+x).val(); 
+		tempOutput += "		public static final String COLUMN_NAME_"+fieldName.toUpperCase()+" = \""+fieldName+"\";\n";
+	}
+
+
+	var outerClass = "import android.net.Uri;\n\
+import android.provider.BaseColumns;\n\
+\n\
+public class "+contractName+" {\n\
+	public static final class "+tableName+" implements BaseColumns {\n\
+\n"+tempOutput+"\n\
+		/**\n\
+		 * The content URI base for a single item. Callers must append a numeric\n\
+		 * segment id to this Uri to retrieve an item\n\
+		 */\n\
+		public static final Uri CONTENT_ID_URI_BASE = Uri.parse("+contractName+".SCHEME + "+contractName+".AUTHORITY\n\
+				+ \"/\" + "+tableName+".TABLE_NAME + \"/\");\n\
+		/**\n\
+		 * The MIME type of a {@link #CONTENT_URI} single item.\n\
+		 */\n\
+		public static final String CONTENT_ITEM_TYPE = \"vnd.android.cursor.item/vnd.npike."+$("#table_name").val()+"\";\n\
+\n\
+		/**\n\
+		 * The MIME type of a {@link #CONTENT_URI} a list of items.\n\
+		 */\n\
+		public static final String CONTENT_TYPE = \"vnd.android.cursor.dir/vnd.npike."+$("#table_name").val()+"\";\n\
+\n\
+		/**\n\
+		 * The content:// style URL for this table\n\
+		 */\n\
+		public static final Uri CONTENT_URI = Uri.parse("+contractName+".SCHEME + "+contractName+".AUTHORITY + \"/\"\n\
+				+ Segments.TABLE_NAME);\n\
+		/**\n\
+		 * The default sort order for this table\n\
+		 */\n\
+		public static final String DEFAULT_SORT_ORDER = "+tableName+".COLUMN_NAME_SEGMENT_NAME + \" ASC\";\n\
+		/**\n\
+		 * The table name offered by this provider\n\
+		 */\n\
+		public static final String TABLE_NAME = \""+$("#table_name").val()+"\";\n\
+		/**\n\
+		 * 0-relative position of a make ID segment in the path part of an item\n\
+		 * ID URI\n\
+		 */\n\
+		public static final int ID_PATH_POSITION = 1;\n\
+\n\
+		/**\n\
+		 * This class cannot be instantiated\n\
+		 */\n\
+		private "+tableName+"() {\n\
+		}\n\
+	}\n\
+	/**\n\
+ 	* Base authority for this content provider\n\
+	 */\n\
+	public static final String AUTHORITY = \""+$("#input_cp_authority").val()+"\";\n\
+	/**\n\
+	 * The scheme part for this provider's URI\n\
+	 */\n\
+	private static final String SCHEME = \"content://\";\n\
+\n\
+	/**\n\
+	 * This class cannot be instantiated\n\
+ 	*/\n\
+	private "+contractName+"() {\n\
+	}\n\
+}";
+
+
+	$("#output").text(outerClass)
+}
+</script>
+</head>
+<body>
+
+<h2>ContentProvider Builder</h2>
+
+<h3>Content Provider Info</h3>
+Content Provider name: <input type="text" id="input_cp_name" value="MyContentProvider"/> <br />
+Authority: <input type="text" id="input_cp_authority" value="com.example.provider.MyContentProvider" size="100"/> <br />
+
+<h3>Table Builder</h3>
+<form method="post">
+<p><label for="table_name">Table name</label><input type="text" name="table_name" id="table_name" value="MyTable"/></p>
+<p>  
+</p>
+<p>
+<input type="button" value="Add Field" id="addField">
+</p>
+ <input type="button" value="Build" onClick='buildTable()' />
+</form>
+
+
+
+<h3>Contract Output</h3>
+<pre id="output" style="background:#CCCCCC"/>
+
+<h3>Provider Output</h3>
+<pre id="provider_output" style="background:#CCCCCC"/>
+
+<script type="text/javascript">
+
+	varCount = 0;
+	//add a new node
+	$('#addField').on('click', function(){
+	varCount++;
+	$node = '<p><label for="var'+varCount+'">Field '+varCount+': </label><input type="text" name="field_'+varCount+'" id="field'+varCount+'"><select id="field_type'+varCount+'"><option value="\numeric\">numeric</option><option value="\text\">text</option></select><span class="removeVar">Remove Field</span></p>';
+	$(this).parent().before($node);
+	});
+
+</script>
+</body>
+</html>
