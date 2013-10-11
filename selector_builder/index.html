@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>Selector Builder</title>
+<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
+
+<script type="text/javascript">
+
+function buildSelector() {
+	var pressedState = $("#input_pressed").val(); 
+	var focusedState = $("#input_focused").val(); 
+	var disabledState = $("#input_disabled").val(); 
+	var defaultState = $("#input_default").val(); 
+
+	var outputText = '<?xml version="1.0" encoding="utf-8"?>\n'
+	outputText += '<selector xmlns:android="http://schemas.android.com/apk/res/android" >\n'
+
+	if (isPopulated(focusedState)) {
+		outputText += '\t<item android:drawable="'+focusedState+'" android:state_focused="true" android:state_pressed="true"/>\n'
+	} else {
+		// use pressed as focused
+		if (isPopulated(pressedState)) {
+			outputText += '\t<item android:drawable="'+pressedState+'" android:state_focused="true" android:state_pressed="true"/>\n'
+		}
+	}
+
+	if (isPopulated(pressedState)) {
+		outputText += '\t<item android:drawable="'+pressedState+'" android:state_pressed="true"/>\n'
+	}
+
+	if (isPopulated(disabledState)) {
+		outputText += '\t<item android:drawable="'+disabledState+'" android:state_enabled="false"/>\n'
+	}
+
+	if (isPopulated(defaultState)) {
+		outputText += '\t<item android:drawable="'+defaultState+'" />\n'
+	}
+	outputText += '</selector>'
+
+	$("#output").text(outputText)
+}
+
+function isPopulated(state) {
+	if (state != "" && state != "@drawable/") {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+</script>
+</head>
+<body>
+
+<h2>Selector Builder</h2>
+
+Pressed: <input type="text" id="input_pressed" value="@drawable/" size="100"/> <br />
+Focused: <input type="text" id="input_focused"  value="@drawable/" size="100"/> <br />
+Disabled: <input type="text" id="input_disabled"  value="@drawable/" size="100"/> <br />
+Default: <input type="text" id="input_default"  value="@drawable/" size="100"/> <br />
+
+<input type="button" value="Build" onClick='buildSelector()' />
+
+<h3>Output</h3>
+<pre id="output" style="background:#CCCCCC"/>
+
+</body>
+</html>
