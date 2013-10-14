@@ -1,6 +1,15 @@
 <html>
 <head>
 <title>ContentProvider Builder</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="../../assets/js/html5shiv.js"></script>
+      <script src="../../assets/js/respond.min.js"></script>
+    <![endif]-->
 <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
 
 
@@ -588,7 +597,9 @@ function buildSql(contractName, tableName) {
 </script>
 </head>
 <body>
+<div class="container">
 
+      <div class="starter-template">
 <h2>ContentProvider Builder</h2>
 
 <h3>Content Provider Info</h3>
@@ -615,6 +626,10 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 <h3>Provider Output</h3>
 <div id="provider_output" style="background:#CCCCCC"/>
 
+ </div>
+
+    </div><!-- /.container -->
+
 <script type="text/javascript">
 
 	varCount = 0;
@@ -631,5 +646,7 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 	});
 
 </script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
 </body>
 </html>
