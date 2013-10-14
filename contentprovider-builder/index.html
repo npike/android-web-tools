@@ -550,7 +550,7 @@ function buildTable() {
 	var sortDirection = $("#table_sort").val();
 
 
-	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection}
+	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("#input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection}
 	var outerClass = tmpl("contract_class_tmpl", data)
 
 
