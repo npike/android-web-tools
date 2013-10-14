@@ -543,7 +543,8 @@ function buildTable() {
 		tempOutput += tmpl("contract_static_field_tmpl", data);
 	}
 
-	var sortColumnIndex = $('input[name = "shouldSort"]').val();
+	// var sortColumnIndex = $('input[name = "shouldSort"]').val();
+	var sortColumnIndex = $("input[type='radio'][name='shouldSort']:checked").val();
 	console.log("sortColumn index: "+sortColumnIndex);
 	var sortColumn = $("#"+sortColumnIndex).val();
 
