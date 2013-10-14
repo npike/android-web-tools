@@ -42,7 +42,7 @@ import android.util.Log;\n
 import com.cw.fullepisodes.android.BuildConfig;\n
 \n
 /**\n
- * Provides access to a database of MaaS <%=tableName%>.\n
+ * Provides access to a database of <%=tableName%>.\n
  */\n
 public class <%=providerName%> extends ContentProvider {\n
 \n
@@ -54,7 +54,7 @@ public class <%=providerName%> extends ContentProvider {\n
 		/**\n
 		 * The database that the provider uses as its underlying data store\n
 		 */\n
-		private static final String DATABASE_NAME = "<%=providerName%>.db";\n
+		private static final String DATABASE_NAME = "<%=tableName%>.db";\n
 		/**\n
 		 * The database version\n
 		 */\n
@@ -168,7 +168,7 @@ public class <%=providerName%> extends ContentProvider {\n
 		case <%=tableName.toUpperCase()%>:\n
 			// If the pattern is for makess, returns the general content type.\n
 			return <%=contractName%>.<%=modelName%>.CONTENT_TYPE;\n
-		case SEGMENT_ID:\n
+		case <%=tableName.toUpperCase()%>_ID:\n
 			// If the pattern is for make IDs, returns the make ID content\n
 			// type.\n
 			return <%=contractName%>.<%=modelName%>.CONTENT_ITEM_TYPE;\n
@@ -332,20 +332,20 @@ public class <%=providerName%> extends ContentProvider {\n
 		int count = 0;\n
 		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
 		case <%=tableName.toUpperCase()%> :\n
-			// If the incoming URI matches the general makes pattern, does the\n
+			// If the incoming URI matches the general items pattern, does the\n
 			// update based on the incoming\n
 			// data.\n
 			count = db.update(<%=contractName%>.<%=tableName%>.TABLE_NAME, values,\n
 					selection, selectionArgs);\n
 			break;\n
 		case <%=tableName.toUpperCase()%>_ID:\n
-			// If the incoming URI matches a single make ID, does the update\n
+			// If the incoming URI matches a single item ID, does the update\n
 			// based on the incoming data, but\n
-			// modifies the where clause to restrict it to the particular make\n
+			// modifies the where clause to restrict it to the particular item\n
 			// ID.\n
 			String finalWhere = BaseColumns._ID\n
 					+ " = "\n
-					+ uri.getPath<%=tableName%>().get(\n
+					+ uri.getPathSegments().get(\n
 							<%=contractName%>.<%=modelName%>.ID_PATH_POSITION);\n
 			// If there were additional selection criteria, append them to the\n
 			// final WHERE clause\n
@@ -572,16 +572,16 @@ function formatFieldName(fieldName) {
 
 function buildSql(contractName, tableName) {
 	tableSql = 'db.execSQL("CREATE TABLE " + '+contractName+'.'+tableName+'.TABLE_NAME \n\
-		+ " (" + BaseColumns._ID INTEGER PRIMARY KEY AUTOINCREMENT,"\n';
+		+ " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"\n';
 
 	for (var x = 1; x <= varCount; x++) {
 		var fieldName = formatFieldName($("#field"+x).val()); 
 		var fieldType = $("#field_type"+x).val();
 
-		tableSql += '		+ '+contractName+'.'+tableName+'.'+fieldName.toUpperCase() + ' + " '+fieldType+', "\n';
+		tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType+', "\n';
 	}
 
-	tableSql += ');");'
+	tableSql += '		+ ");");'
 
 	return tableSql;
 }
