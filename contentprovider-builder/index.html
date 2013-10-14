@@ -1,20 +1,30 @@
-<html>
-<head>
-<title>ContentProvider Builder</title>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+	<title>ContentProvider Builder</title>
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="../../assets/js/html5shiv.js"></script>
       <script src="../../assets/js/respond.min.js"></script>
     <![endif]-->
-<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
+	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
 
 
 <script type="text/html" id="new_field_tmpl">
-<p><label for="var<%=varCount%>">Field <%=varCount%>: </label><input type="text" name="field_<%=varCount%>" id="field<%=varCount%>"><select id="field_type<%=varCount%>"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>" checked="true"/> Sort <span class="removeVar">&lt;Remove Field&gt;</span></p>
+<div class="control-group">
+ <label class="control-label" for="var<%=varCount%>">Field <%=varCount%></label>
+ <div class="controls">
+    <input id="field<%=varCount%>" name="field<%=varCount%>" type="text" placeholder="" class="input-xlarge" required=""> 
+    <select id="field_type<%=varCount%>"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+ </div>
+</div>
 </script>
 
 <script type="text/html" id="contract_static_field_tmpl">
@@ -546,10 +556,14 @@ function buildTable() {
 	var tableName = capitaliseFirstLetter($("#table_name").val())
 
 	for (var x = 1; x <= varCount; x++) {
-		var fieldName = formatFieldName($("#field"+x).val()); 
+		var rawField = $("#field"+x).val();
+		if (rawField != undefined) {
+			var fieldName = formatFieldName(rawField); 
 
-		var data={fieldName: fieldName, upperFieldName: fieldName.toUpperCase()} 
-		tempOutput += tmpl("contract_static_field_tmpl", data);
+
+			var data={fieldName: fieldName, upperFieldName: fieldName.toUpperCase()} 
+			tempOutput += tmpl("contract_static_field_tmpl", data);
+		}
 	}
 
 	// var sortColumnIndex = $('input[name = "shouldSort"]').val();
@@ -584,10 +598,13 @@ function buildSql(contractName, tableName) {
 		+ " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"\n';
 
 	for (var x = 1; x <= varCount; x++) {
-		var fieldName = formatFieldName($("#field"+x).val()); 
-		var fieldType = $("#field_type"+x).val();
+		var rawField = $("#field"+x).val();
+		if (rawField != undefined) {
+			var fieldName = formatFieldName(rawField); 
+			var fieldType = $("#field_type"+x).val();
 
-		tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType+', "\n';
+			tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType+', "\n';
+		}
 	}
 
 	tableSql += '		+ ");");'
@@ -597,56 +614,108 @@ function buildSql(contractName, tableName) {
 </script>
 </head>
 <body>
-<div class="container">
-
-      <div class="starter-template">
-<h2>ContentProvider Builder</h2>
-
-<h3>Content Provider Info</h3>
-Content Provider name: <input type="text" id="input_cp_name" value="MyContentProvider"/> <br />
-Authority: <input type="text" id="input_cp_authority" value="com.example.provider.MyContentProvider" size="100"/> <br />
-
-<h3>Table Builder</h3>
-<form method="post">
-<p><label for="table_name">Table name</label><input type="text" name="table_name" id="table_name" value="MyTable"/></p>
-<label for="table_sort">Sort</label><select id="table_sort"><option value="ASC" selected>asc</option><option value="DESC">desc</option></select>
-<p>  
-</p>
-<p>
-<input type="button" value="Add Field" id="addField">
-</p>
- <input type="button" value="Build" onClick='buildTable()' />
-</form>
-
-
-
-<h3>Contract Output</h3>
-<div id="output" style="background:#CCCCCC"></div>
-
-<h3>Provider Output</h3>
-<div id="provider_output" style="background:#CCCCCC"/>
-
- </div>
-
-    </div><!-- /.container -->
-
-<script type="text/javascript">
-
-	varCount = 0;
-	//add a new node
-	$('#addField').on('click', function(){
-		varCount++; 
-		var data={varCount: varCount}
-		$node = tmpl("new_field_tmpl", data)
-		$(this).parent().before($node);
-		$('form').on('click', '.removeVar', function(){ 
-  			$(this).parent().remove();
-  
-		});
-	});
-
-</script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="js/bootstrap.min.js"></script>
+   <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+         <div class="container">
+            <a class="brand" href="#">Android Web Tools</a>
+         </div>
+      </div>
+   </div>
+   <div class="container">
+   <div class="row clearfix">
+      <div class="span6">
+         <div class="clearfix">
+            <form class="form-horizontal">
+               <fieldset>
+                  <!-- Form Name -->
+                  <legend>Content Provider Builder</legend>
+                  <!-- Text input-->
+                  <div class="control-group">
+                     <label class="control-label" for="input_cp_name">Content Provider Name</label>
+                     <div class="controls">
+                        <input id="input_cp_name" name="input_cp_name" type="text" placeholder="MyContentProvider" class="input-xlarge" required=""> 
+                     </div>
+                  </div>
+                  <!-- Text input-->
+                  <div class="control-group">
+                     <label class="control-label" for="input_cp_authority">Authority</label>
+                     <div class="controls">
+                        <input id="input_cp_authority" name="input_cp_authority" type="text" placeholder="com.example.provider.MyContentProvider" class="input-xlarge" required=""> 
+                     </div>
+                  </div>
+               </fieldset>
+               <fieldset>
+                  <!-- Form Name -->
+                  <legend>Table info</legend>
+                  <!-- Text input-->
+                  <div class="control-group">
+                     <label class="control-label" for="table_name">Table name</label>
+                     <div class="controls">
+                        <input id="table_name" name="table_name" type="text" placeholder="ModelName" class="input-xlarge" required=""> 
+                     </div>
+                  </div>
+                  <!-- Select Basic -->
+                  <div class="control-group">
+                     <label class="control-label" for="table_sort">Default Sort</label>
+                     <div class="controls">
+                        <select id="table_sort" name="table_sort" class="input-xlarge">
+                           <option>asc</option>
+                           <option>desc</option>
+                        </select>
+                     </div>
+                  </div>
+                  <div class="control-group">
+                     <label class="control-label" for="field1">Field 1</label>
+                     <div class="controls">
+                        <input id="field1" name="field1" type="text" placeholder="" class="input-xlarge" required=""> 
+                        <select id="field_type1">
+                           <option value="INTEGER">integer</option>
+                           <option value="TEXT">text</option>
+                        </select>
+                        <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+                     </div>
+                  </div>
+                  <!-- Button -->
+                  <div class="control-group">
+                     <label class="control-label" for="addField"></label>
+                     <div class="controls">
+                        <button id="addField" name="addField" class="btn btn-primary">Add another field</button>
+                     </div>
+                  </div>
+               </fieldset>
+               <!-- Button -->
+               <div class="control-group">
+                  <label class="control-label" for="buid"></label>
+                  <div class="controls">
+                     <button id="buid" name="buid" class="btn btn-success"  onClick='buildTable()'>Build</button>
+                  </div>
+               </div>
+            </form>
+            <h3>Contract Output</h3>
+            <div id="output" style="background:#CCCCCC"></div>
+            <h3>Provider Output</h3>
+            <div id="provider_output" style="background:#CCCCCC"/>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- /.container -->
+   <script type="text/javascript">
+      varCount = 1;
+      //add a new node
+      $('#addField').on('click', function(){
+      	varCount++; 
+      	var data={varCount: varCount}
+      	$node = tmpl("new_field_tmpl", data)
+      	$(this).parent().before($node);
+      	$('form').on('click', '#remove', function(){ 
+       			$(this).parent().parent().remove();
+       
+      	});
+      });
+      
+   </script>
+   <!-- Include all compiled plugins (below), or include individual files as needed -->
+   <script src="js/bootstrap.min.js"></script>
 </body>
 </html>
