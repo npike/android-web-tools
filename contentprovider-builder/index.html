@@ -633,18 +633,16 @@ function buildSql(contractName, tableName) {
                   <div class="control-group">
                      <label class="control-label" for="input_cp_name">Content Provider Name</label>
                      <div class="controls">
-                        <input id="input_cp_name" name="input_cp_name" type="text" placeholder="MyContentProvider" class="input-xlarge" required=""> 
+                        <input id="input_cp_name" name="input_cp_name" type="text" placeholder="MyContentProvider" class="input-xlarge"> 
                      </div>
                   </div>
                   <!-- Text input-->
                   <div class="control-group">
                      <label class="control-label" for="input_cp_authority">Authority</label>
                      <div class="controls">
-                        <input id="input_cp_authority" name="input_cp_authority" type="text" placeholder="com.example.provider.MyContentProvider" class="input-xlarge" required=""> 
+                        <input id="input_cp_authority" name="input_cp_authority" type="text" placeholder="com.example.provider.MyContentProvider" class="input-xlarge"> 
                      </div>
-                  </div>
-               </fieldset>
-               <fieldset>
+                  </div> 
                   <!-- Form Name -->
                   <legend>Table info</legend>
                   <!-- Text input-->
@@ -687,7 +685,7 @@ function buildSql(contractName, tableName) {
                <div class="control-group">
                   <label class="control-label" for="buid"></label>
                   <div class="controls">
-                     <button id="buid" name="buid" class="btn btn-success"  onClick='buildTable()'>Build</button>
+	                  <input type="button" class="btn" id="signin_button"   onClick='buildTable()' value="Build Content Provider"/> 
                   </div>
                </div>
             </form>
