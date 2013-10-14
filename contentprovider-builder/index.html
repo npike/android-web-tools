@@ -5,11 +5,11 @@
 
 
 <script type="text/html" id="new_field_tmpl">
-<p><label for="var<%=varCount%>">Field <%=varCount%>: </label><input type="text" name="field_<%=varCount%>" id="field<%=varCount%>"><select id="field_type<%=varCount%>"><option value="numeric">numeric</option><option value="text">text</option></select><span class="removeVar">Remove Field</span></p>
+<p><label for="var<%=varCount%>">Field <%=varCount%>: </label><input type="text" name="field_<%=varCount%>" id="field<%=varCount%>"><select id="field_type<%=varCount%>"><option value="numeric">numeric</option><option value="text">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>" checked="true"/> Sort <span class="removeVar">&lt;Remove Field&gt;</span></p>
 </script>
 
 <script type="text/html" id="contract_static_field_tmpl">
-	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName%.toLowerCase()>";\n
+	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName.toLowerCase()%>";\n
 </script>
 
 
@@ -448,7 +448,7 @@ public class <%=contractName%> {\n
 		/**\n
 		 * The default sort order for this table\n
 		 */\n
-		public static final String DEFAULT_SORT_ORDER = <%=modelName%>.COLUMN_NAME_SEGMENT_NAME + " ASC";\n
+		public static final String DEFAULT_SORT_ORDER = <%=modelName%>.COLUMN_NAME_<%=sortColumn.toUpperCase()%> + " <%=sortDirection%>";\n
 		/**\n
 		 * The table name offered by this provider\n
 		 */\n
@@ -536,10 +536,6 @@ function buildTable() {
 	var contractName = $("#input_cp_name").val() + "Contract"
 	var tableName = capitaliseFirstLetter($("#table_name").val())
 
-	
-
-	
-
 	for (var x = 1; x <= varCount; x++) {
 		var fieldName = $("#field"+x).val(); 
 
@@ -547,8 +543,14 @@ function buildTable() {
 		tempOutput += tmpl("contract_static_field_tmpl", data);
 	}
 
+	var sortColumnIndex = $('input[name = "shouldSort"]').val();
+	console.log("sortColumn index: "+sortColumnIndex);
+	var sortColumn = $("#"+sortColumnIndex).val();
 
-	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("input_cp_authority").val(), staticFields: tempOutput}
+	var sortDirection = $("#table_sort").val();
+
+
+	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection}
 	var outerClass = tmpl("contract_class_tmpl", data)
 
 
@@ -574,6 +576,7 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 <h3>Table Builder</h3>
 <form method="post">
 <p><label for="table_name">Table name</label><input type="text" name="table_name" id="table_name" value="MyTable"/></p>
+<label for="table_sort">Sort</label><select id="table_sort"><option value="ASC" selected>asc</option><option value="DESC">desc</option></select>
 <p>  
 </p>
 <p>
@@ -595,12 +598,14 @@ Authority: <input type="text" id="input_cp_authority" value="com.example.provide
 	varCount = 0;
 	//add a new node
 	$('#addField').on('click', function(){
-	varCount++;
-	// $node = '<p><label for="var'+varCount+'">Field '+varCount+': </label><input type="text" name="field_'+varCount+'" id="field'+varCount+'"><select id="field_type'+varCount+'"><option value="\numeric\">numeric</option><option value="\text\">text</option></select><span class="removeVar">Remove Field</span></p>';
-
-	var data={varCount: varCount}
-	$node = tmpl("new_field_tmpl", data)
-	$(this).parent().before($node);
+		varCount++; 
+		var data={varCount: varCount}
+		$node = tmpl("new_field_tmpl", data)
+		$(this).parent().before($node);
+		$('form').on('click', '.removeVar', function(){ 
+  			$(this).parent().remove();
+  
+		});
 	});
 
 </script>
