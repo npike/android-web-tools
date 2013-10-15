@@ -603,7 +603,13 @@ function buildSql(contractName, tableName) {
 			var fieldName = formatFieldName(rawField); 
 			var fieldType = $("#field_type"+x).val();
 
-			tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType+', "\n';
+			tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType;
+
+			if (x < varCount) {
+				tableSql +=', '
+			}
+
+			tableSql += '"\n';
 		}
 	}
 
