@@ -307,9 +307,9 @@ public class <%=providerName%> extends ContentProvider {\n
 		case <%=tableName%>:\n
 			break;\n
 		case SEGMENT_ID:\n
-			// If the incoming URI is for a single make identified by its ID,\n
+			// If the incoming URI is for a single item identified by its ID,\n
 			// appends "_ID = <makeID>"\n
-			// to the where clause, so that it selects that single make\n
+			// to the where clause, so that it selects that single item\n
 			qb.appendWhere(BaseColumns._ID\n
 					+ "="\n
 					+ uri.getPath<%=tableName%>().get(\n
