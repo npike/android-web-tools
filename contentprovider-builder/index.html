@@ -36,6 +36,10 @@
 <pre>
 package net.npike.android;\n\n
 
+/**\n
+ * Generated from {%=web_url%}\n
+ */\n\n
+
 import java.util.ArrayList;\n
 import java.util.HashMap;\n
 import java.util.HashSet;\n
@@ -417,6 +421,12 @@ public class {%=providerName%} extends ContentProvider {\n
 
 <script type="text/html" id="contract_class_tmpl"> 
 <pre>
+package net.npike.android;\n\n
+
+/**\n
+ * Generated from {%=web_url%}\n
+ */\n\n
+
 import android.net.Uri;\n
 import android.provider.BaseColumns;\n
 \n
@@ -556,7 +566,7 @@ function buildTable() {
 	var sortDirection = $("#table_sort").val();
 
 
-	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("#input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection}
+	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("#input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection, web_url: window.location}
 	var outerClass = tmpl("contract_class_tmpl", data)
 
 
@@ -578,7 +588,7 @@ function buildTable() {
 		}
 	}
 
-	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val(), projectionMap: projectionMap}
+	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val(), projectionMap: projectionMap, web_url: window.location}
 	$("#provider_output").html(tmpl("provider_class_tmpl", providerData))
 }
 
