@@ -18,8 +18,7 @@
 	<script type="text/javascript" src="js/jhash-2.1.js"></script> 
 
 <script type="text/html" id="new_field_tmpl">
-<div class="control-group">
- <label class="control-label" for="var{%=varCount%}">Field {%=varCount%}</label>
+<div class="control-group"> 
  <div class="controls" id="{%=varCount%}">
     <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
     <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
@@ -648,9 +647,18 @@ function init() {
 
 	// does the inputMap contain fields pass field1 that we need to readd?
 	console.log("There are "+inputMap["fields"]+ " fields saved.")
+
 	for (var x = 1; x < inputMap["fields"]; x++) {
-		console.log("Restoring field "+(x+1))
-		$('#addField').each(addNewField)
+		
+
+		// is there something worth restoring?
+		if (inputMap['field'+(x+1)] != "" && inputMap['field'+(x+1)] != undefined) {
+			console.log("Restoring field "+(x+1))
+			$('#addField').each(addNewField)
+		} else {
+			console.log("Looks like field"+(x+1)+" doesn't actually contain anything..");
+			varCount++;
+		}
 	}
 
 	// restore selected radioButton for sorting
@@ -787,7 +795,7 @@ function storeValue(keyName, keyValue) {
                      </div>
                   </div>
                   <div class="control-group">
-                     <label class="control-label" for="field1">Field 1</label>
+                     
                      <div class="controls">
                         <input id="field1" name="field1" type="text" placeholder="" class="input-xlarge" required=""> 
                         <select id="field_type1">
