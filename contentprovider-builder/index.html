@@ -19,21 +19,23 @@
 
 <script type="text/html" id="new_field_tmpl">
 <div class="control-group">
- <label class="control-label" for="var<%=varCount%>">Field <%=varCount%></label>
- <div class="controls" id="<%=varCount%>">
-    <input id="field<%=varCount%>" name="field<%=varCount%>" type="text" placeholder="" class="input-xlarge" required=""> 
-    <select id="field_type<%=varCount%>"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+ <label class="control-label" for="var{%=varCount%}">Field {%=varCount%}</label>
+ <div class="controls" id="{%=varCount%}">
+    <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
+    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
  </div>
 </div>
 </script>
 
 <script type="text/html" id="contract_static_field_tmpl">
-	public static final String COLUMN_NAME_<%=upperFieldName%> = "<%=fieldName.toLowerCase()%>";\n
+	public static final String COLUMN_NAME_{%=upperFieldName%} = "{%=fieldName.toLowerCase()%}";\n
 </script>
 
 
 <script type="text/html" id="provider_class_tmpl"> 
 <pre>
+package net.npike.android;\n\n
+
 import java.util.ArrayList;\n
 import java.util.HashMap;\n
 import java.util.HashSet;\n
@@ -56,24 +58,22 @@ import android.database.sqlite.SQLiteQueryBuilder;\n
 import android.net.Uri;\n
 import android.provider.BaseColumns;\n
 import android.text.TextUtils;\n
-import android.util.Log;\n
-\n
-import com.cw.fullepisodes.android.BuildConfig;\n
+import android.util.Log;\n 
 \n
 /**\n
- * Provides access to a database of <%=tableName%>.\n
+ * Provides access to a database of {%=tableName%}.\n
  */\n
-public class <%=providerName%> extends ContentProvider {\n
+public class {%=providerName%} extends ContentProvider {\n
 \n
 	private volatile boolean mNotificationsSuspended;\n
-	private LinkedList<Uri> mSuspendedNotifications = new LinkedList<Uri>();\n
-	private Set<Uri> mSuspendedNotificationsSet = new HashSet<Uri>();\n
+	private LinkedList&lt;Uri&gt; mSuspendedNotifications = new LinkedList&lt;Uri&gt;();\n
+	private Set&lt;Uri&gt; mSuspendedNotificationsSet = new HashSet&lt;Uri&gt;();\n
 \n
 	static class ProviderDatabaseHelper extends SQLiteOpenHelper {\n
 		/**\n
 		 * The database that the provider uses as its underlying data store\n
 		 */\n
-		private static final String DATABASE_NAME = "<%=tableName%>.db";\n
+		private static final String DATABASE_NAME = "{%=tableName%}.db";\n
 		/**\n
 		 * The database version\n
 		 */\n
@@ -97,13 +97,9 @@ public class <%=providerName%> extends ContentProvider {\n
 		 * taken from the ColorContract class.\n
 		 */\n
 		@Override\n
-		public void onCreate(final SQLiteDatabase db) {\n
-			if (BuildConfig.DEBUG) {\n
-				Log.d(<%=providerName%>.class.getSimpleName(), "Creating the "\n
-						+ <%=contractName%>.<%=tableName%>.TABLE_NAME + " table");\n
-			}\n
+		public void onCreate(final SQLiteDatabase db) {\n 
 \n
-			<%=tableSql%>
+			{%=tableSql%}
 \n
 		}\n
 \n
@@ -115,11 +111,11 @@ public class <%=providerName%> extends ContentProvider {\n
 		@Override\n
 		public void onUpgrade(final SQLiteDatabase db, final int oldVersion,\n
 				final int newVersion) {\n
-			Log.w(<%=providerName%>.class.getSimpleName(),\n
+			Log.w({%=providerName%}.class.getSimpleName(),\n
 					"Upgrading database from version " + oldVersion + " to "\n
 							+ newVersion + ", which will destroy all old data");\n
 			// db.execSQL("DROP TABLE IF EXISTS " +\n
-			// <%=contractName%>.<%=tableName%>.TABLE_NAME);\n
+			// {%=contractName%}.{%=tableName%}.TABLE_NAME);\n
 \n
 			this.onCreate(db);\n
 		}\n
@@ -128,11 +124,11 @@ public class <%=providerName%> extends ContentProvider {\n
 	/**\n
 	 * A UriMatcher instance\n
 	 */\n
-	private static final UriMatcher uriMatcher = <%=providerName%>\n
+	private static final UriMatcher uriMatcher = {%=providerName%}\n
 			.buildUriMatcher();\n
 \n
-	private static final int <%=tableName.toUpperCase()%>_ID = 2;\n
-	private static final int <%=tableName.toUpperCase()%> = 1;\n
+	private static final int {%=tableName.toUpperCase()%}_ID = 2;\n
+	private static final int {%=tableName.toUpperCase()%} = 1;\n
 \n
 	/**\n
 	 * Creates and initializes the URI matcher\n
@@ -142,11 +138,11 @@ public class <%=providerName%> extends ContentProvider {\n
 	private static UriMatcher buildUriMatcher() {\n
 		final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);\n
 \n
-		matcher.addURI(<%=contractName%>.AUTHORITY, "<%=tableName%>",\n
-				<%=providerName%>.<%=tableName.toUpperCase()%>);\n
+		matcher.addURI({%=contractName%}.AUTHORITY, "{%=tableName%}",\n
+				{%=providerName%}.{%=tableName.toUpperCase()%});\n
 \n
-		matcher.addURI(<%=contractName%>.AUTHORITY, "<%=tableName%>/#",\n
-				<%=providerName%>.<%=tableName.toUpperCase()%>_ID);\n
+		matcher.addURI({%=contractName%}.AUTHORITY, "{%=tableName%}/#",\n
+				{%=providerName%}.{%=tableName.toUpperCase()%}_ID);\n
 \n
 		return matcher;\n
 	}\n
@@ -163,12 +159,12 @@ public class <%=providerName%> extends ContentProvider {\n
 		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
 		int count;\n
 		// Does the delete based on the incoming URI pattern.\n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%>:\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%}:\n
 			// If the incoming pattern matches the general pattern for makes,\n
 			// does a delete based on the\n
 			// incoming "where" columns and arguments.\n
-			count = db.delete(<%=contractName%>.<%=modelName%>.TABLE_NAME, where,\n
+			count = db.delete({%=contractName%}.{%=modelName%}.TABLE_NAME, where,\n
 					whereArgs);\n
 			break;\n
 		default:\n
@@ -183,14 +179,14 @@ public class <%=providerName%> extends ContentProvider {\n
 		/**\n
 		 * Chooses the MIME type based on the incoming URI pattern\n
 		 */\n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%>:\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%}:\n
 			// If the pattern is for makess, returns the general content type.\n
-			return <%=contractName%>.<%=modelName%>.CONTENT_TYPE;\n
-		case <%=tableName.toUpperCase()%>_ID:\n
+			return {%=contractName%}.{%=modelName%}.CONTENT_TYPE;\n
+		case {%=tableName.toUpperCase()%}_ID:\n
 			// If the pattern is for make IDs, returns the make ID content\n
 			// type.\n
-			return <%=contractName%>.<%=modelName%>.CONTENT_ITEM_TYPE;\n
+			return {%=contractName%}.{%=modelName%}.CONTENT_ITEM_TYPE;\n
 \n
 		default:\n
 			throw new IllegalArgumentException("Unknown URI " + uri);\n
@@ -199,16 +195,16 @@ public class <%=providerName%> extends ContentProvider {\n
 \n
 	@Override\n
 	public Uri insert(final Uri uri, final ContentValues initialValues) {\n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%>:\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%}:\n
 			// insert a specific make\n
-			return insert<%=modelName%>(uri, initialValues);\n
+			return insert{%=modelName%}(uri, initialValues);\n
 		default:\n
 			throw new IllegalArgumentException("Unknown URI " + uri);\n
 		}\n
 	}\n
 \n
-	private Uri insert<%=modelName%>(final Uri uri, final ContentValues initialValues) {\n
+	private Uri insert{%=modelName%}(final Uri uri, final ContentValues initialValues) {\n
 		ContentValues values;\n
 		if (initialValues != null) {\n
 			values = new ContentValues(initialValues);\n
@@ -218,27 +214,27 @@ public class <%=providerName%> extends ContentProvider {\n
 \n
 		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
 \n/**
-		//String selection = <%=contractName%>.<%=modelName%>.COLUMN_NAME_SEGMENT_NAME\n
-				+ "=? OR " + <%=contractName%>.<%=modelName%>.COLUMN_NAME_SEGMENT_ID\n
+		//String selection = {%=contractName%}.{%=modelName%}.COLUMN_NAME_SEGMENT_NAME\n
+				+ "=? OR " + {%=contractName%}.{%=modelName%}.COLUMN_NAME_SEGMENT_ID\n
 				+ " =?";\n
 		String[] selectionArgs = new String[] {\n
-				values.getAsString(<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME),\n
-				values.getAsString(<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID) };\n
+				values.getAsString({%=contractName%}.{%=tableName%}.COLUMN_NAME_SEGMENT_NAME),\n
+				values.getAsString({%=contractName%}.{%=tableName%}.COLUMN_NAME_SEGMENT_ID) };\n
 \n
 		// Do an update if the constraints match\n
-		db.update(<%=contractName%>.<%=tableName%>.TABLE_NAME, values, selection,\n
+		db.update({%=contractName%}.{%=tableName%}.TABLE_NAME, values, selection,\n
 				selectionArgs);\n
 \n
 		final long rowId = db.insertWithOnConflict(\n
-				<%=contractName%>.<%=tableName%>.TABLE_NAME,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME, values,\n
+				{%=contractName%}.{%=tableName%}.TABLE_NAME,\n
+				{%=contractName%}.{%=tableName%}.COLUMN_NAME_SEGMENT_NAME, values,\n
 				SQLiteDatabase.CONFLICT_IGNORE);\n
 		// If the insert succeeded, the row ID exists.\n
 		if (rowId > 0) {\n
 			// Creates a URI with the make ID pattern and the new row ID\n
 			// appended to it.\n
 			final Uri inserUri = ContentUris.withAppendedId(\n
-					<%=contractName%>.<%=tableName%>.CONTENT_ID_URI_BASE, rowId);\n
+					{%=contractName%}.{%=tableName%}.CONTENT_ID_URI_BASE, rowId);\n
 \n
 			notifyChange(uri);\n
 \n
@@ -265,11 +261,11 @@ public class <%=providerName%> extends ContentProvider {\n
 			final String selection, final String[] selectionArgs,\n
 			final String sortOrder) {\n
 \n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%>:\n
-		case <%=tableName.toUpperCase()%>_ID:\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%}:\n
+		case {%=tableName.toUpperCase()%}_ID:\n
 			// insert a specific make\n
-			return query<%=modelName%>(uri, projection, selection, selectionArgs,\n
+			return query{%=modelName%}(uri, projection, selection, selectionArgs,\n
 					sortOrder);\n
 		default:\n
 			return null;\n
@@ -277,48 +273,35 @@ public class <%=providerName%> extends ContentProvider {\n
 \n
 	}\n
 \n
-	private Cursor query<%=modelName%>(final Uri uri, final String[] projection,\n
+	private Cursor query{%=modelName%}(final Uri uri, final String[] projection,\n
 			final String selection, final String[] selectionArgs,\n
 			final String sortOrder) {\n
-		// Constructs a new query builder and sets its table name\n
-		/**
+		// Constructs a new query builder and sets its table name\n 
 		final SQLiteQueryBuilder qb = new SQLiteQueryBuilder();\n
-		qb.setTables(<%=contractName%>.<%=tableName%>.TABLE_NAME);\n
-		final HashMap<String, String> allColumnProjectionMap = new HashMap<String, String>();\n
+		qb.setTables({%=contractName%}.{%=tableName%}.TABLE_NAME);\n
+		final HashMap&lt;String, String&gt; allColumnProjectionMap = new HashMap&lt;String, String&gt;();\n
 		allColumnProjectionMap.put(BaseColumns._ID, BaseColumns._ID);\n
-		allColumnProjectionMap.put(\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_ID);\n
-		allColumnProjectionMap.put(\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SEGMENT_NAME);\n
-		allColumnProjectionMap.put(\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_IS_SUBSCRIBED,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_IS_SUBSCRIBED);\n
-		allColumnProjectionMap.put(\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_NAME,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_NAME);\n
-		allColumnProjectionMap.put(\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_THUMB,\n
-				<%=contractName%>.<%=tableName%>.COLUMN_NAME_SHOW_THUMB);\n
+		
+	{%=projectionMap%}
 \n
 		qb.setProjectionMap(allColumnProjectionMap);\n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName%>:\n
+
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=modelName.toUpperCase()%}:\n
 			break;\n
-		case SEGMENT_ID:\n
+		case {%=modelName.toUpperCase()%}_ID:\n
 			// If the incoming URI is for a single item identified by its ID,\n
 			// appends "_ID = <makeID>"\n
 			// to the where clause, so that it selects that single item\n
 			qb.appendWhere(BaseColumns._ID\n
 					+ "="\n
-					+ uri.getPath<%=tableName%>().get(\n
-							<%=contractName%>.<%=tableName%>.ID_PATH_POSITION));\n
+					+ uri.getPathSegments().get(\n
+							{%=contractName%}.{%=tableName%}.ID_PATH_POSITION));\n
 			break;\n
 		}\n
 		String orderBy;\n
 		if (TextUtils.isEmpty(sortOrder)) {\n
-			orderBy = <%=contractName%>.<%=tableName%>.DEFAULT_SORT_ORDER;\n
+			orderBy = {%=contractName%}.{%=tableName%}.DEFAULT_SORT_ORDER;\n
 		} else {\n
 			orderBy = sortOrder;\n
 		}\n
@@ -326,38 +309,37 @@ public class <%=providerName%> extends ContentProvider {\n
 		final Cursor c = qb.query(db, projection, selection, selectionArgs,\n
 				null, null, orderBy);\n
 		c.setNotificationUri(getContext().getContentResolver(), uri);\n
-		return c;\n
-		**/
+		return c;
 	}\n
 \n
 	@Override\n
 	public int update(final Uri uri, final ContentValues values,\n
 			final String selection, final String[] selectionArgs) {\n
 \n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%>:\n
-		case <%=tableName.toUpperCase()%>_ID:\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%}:\n
+		case {%=tableName.toUpperCase()%}_ID:\n
 			// insert a specific make\n
-			return update<%=modelName%>(uri, values, selection, selectionArgs);\n
+			return update{%=modelName%}(uri, values, selection, selectionArgs);\n
 		default:\n
 			return 0;\n
 		}\n
 	}\n
 \n
-	private int update<%=modelName%>(final Uri uri, final ContentValues values,\n
+	private int update{%=modelName%}(final Uri uri, final ContentValues values,\n
 			final String selection, final String[] selectionArgs) {\n
 \n
 		final SQLiteDatabase db = databaseHelper.getWritableDatabase();\n
 		int count = 0;\n
-		switch (<%=providerName%>.uriMatcher.match(uri)) {\n
-		case <%=tableName.toUpperCase()%> :\n
+		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
+		case {%=tableName.toUpperCase()%} :\n
 			// If the incoming URI matches the general items pattern, does the\n
 			// update based on the incoming\n
 			// data.\n
-			count = db.update(<%=contractName%>.<%=tableName%>.TABLE_NAME, values,\n
+			count = db.update({%=contractName%}.{%=tableName%}.TABLE_NAME, values,\n
 					selection, selectionArgs);\n
 			break;\n
-		case <%=tableName.toUpperCase()%>_ID:\n
+		case {%=tableName.toUpperCase()%}_ID:\n
 			// If the incoming URI matches a single item ID, does the update\n
 			// based on the incoming data, but\n
 			// modifies the where clause to restrict it to the particular item\n
@@ -365,13 +347,13 @@ public class <%=providerName%> extends ContentProvider {\n
 			String finalWhere = BaseColumns._ID\n
 					+ " = "\n
 					+ uri.getPathSegments().get(\n
-							<%=contractName%>.<%=modelName%>.ID_PATH_POSITION);\n
+							{%=contractName%}.{%=modelName%}.ID_PATH_POSITION);\n
 			// If there were additional selection criteria, append them to the\n
 			// final WHERE clause\n
 			if (selection != null) {\n
 				finalWhere = finalWhere + " AND " + selection;\n
 			}\n
-			count = db.update(<%=contractName%>.<%=modelName%>.TABLE_NAME, values,\n
+			count = db.update({%=contractName%}.{%=modelName%}.TABLE_NAME, values,\n
 					finalWhere, selectionArgs);\n
 			break;\n
 		default:\n
@@ -383,7 +365,7 @@ public class <%=providerName%> extends ContentProvider {\n
 \n
 	@Override\n
 	public ContentProviderResult[] applyBatch(\n
-			ArrayList<ContentProviderOperation> operations)\n
+			ArrayList&lt;ContentProviderOperation&gt; operations)\n
 			throws OperationApplicationException {\n
 		setNotificationsSuspended(true);\n
 		databaseHelper.getWritableDatabase().beginTransaction();\n
@@ -438,40 +420,40 @@ public class <%=providerName%> extends ContentProvider {\n
 import android.net.Uri;\n
 import android.provider.BaseColumns;\n
 \n
-public class <%=contractName%> {\n
-	public static final class <%=modelName%> implements BaseColumns {\n
+public class {%=contractName%} {\n
+	public static final class {%=modelName%} implements BaseColumns {\n
 \n
-<%=staticFields%>
+{%=staticFields%}
 
 		/**\n
 		 * The content URI base for a single item. Callers must append a numeric\n
 		 * segment id to this Uri to retrieve an item\n
 		 */\n
-		public static final Uri CONTENT_ID_URI_BASE = Uri.parse(<%=contractName%>.SCHEME + <%=contractName%>.AUTHORITY\n
-				+ "/" + <%=modelName%>.TABLE_NAME + "/");\n
+		public static final Uri CONTENT_ID_URI_BASE = Uri.parse({%=contractName%}.SCHEME + {%=contractName%}.AUTHORITY\n
+				+ "/" + {%=modelName%}.TABLE_NAME + "/");\n
 		/**\n
 		 * The MIME type of a {@link #CONTENT_URI} single item.\n
 		 */\n
-		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.npike.<%=tableName.toLowerCase()%>";\n
+		public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/vnd.npike.{%=tableName.toLowerCase()%}";\n
 \n
 		/**\n
 		 * The MIME type of a {@link #CONTENT_URI} a list of items.\n
 		 */\n
-		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.npike.<%=tableName.toLowerCase()%>";\n
+		public static final String CONTENT_TYPE = "vnd.android.cursor.dir/vnd.npike.{%=tableName.toLowerCase()%}";\n
 \n
 		/**\n
 		 * The content:// style URL for this table\n
 		 */\n
-		public static final Uri CONTENT_URI = Uri.parse(<%=contractName%>.SCHEME + <%=contractName%>.AUTHORITY + "/"\n
-				+ <%=modelName%>.TABLE_NAME);\n
+		public static final Uri CONTENT_URI = Uri.parse({%=contractName%}.SCHEME + {%=contractName%}.AUTHORITY + "/"\n
+				+ {%=modelName%}.TABLE_NAME);\n
 		/**\n
 		 * The default sort order for this table\n
 		 */\n
-		public static final String DEFAULT_SORT_ORDER = <%=modelName%>.COLUMN_NAME_<%=sortColumn.toUpperCase()%> + " <%=sortDirection%>";\n
+		public static final String DEFAULT_SORT_ORDER = {%=modelName%}.COLUMN_NAME_{%=sortColumn.toUpperCase()%} + " {%=sortDirection%}";\n
 		/**\n
 		 * The table name offered by this provider\n
 		 */\n
-		public static final String TABLE_NAME = "<%=tableName%>";\n
+		public static final String TABLE_NAME = "{%=tableName%}";\n
 		/**\n
 		 * 0-relative position of a make ID segment in the path part of a make\n
 		 * ID URI\n
@@ -481,14 +463,14 @@ public class <%=contractName%> {\n
 		/**\n
 		 * This class cannot be instantiated\n
 		 */\n
-		private <%=modelName%>() {\n
+		private {%=modelName%}() {\n
 		}\n
 	}\n
 \n
 	/**\n
 	 * Base authority for this content provider\n
 	 */\n
-	public static final String AUTHORITY = "<%=authority%>";\n
+	public static final String AUTHORITY = "{%=authority%}";\n
 	/**\n
 	 * The scheme part for this provider's URI\n
 	 */\n
@@ -497,7 +479,7 @@ public class <%=contractName%> {\n
 	/**\n
 	 * This class cannot be instantiated\n
 	 */\n
-	private <%=contractName%>() {\n
+	private {%=contractName%}() {\n
 	}\n
 }\n
 </pre>
@@ -507,6 +489,7 @@ public class <%=contractName%> {\n
 
 // Simple JavaScript Templating
 // John Resig - http://ejohn.org/ - MIT Licensed
+// http://ejohn.org/blog/javascript-micro-templating/
 (function(){
   var cache = {};
  
@@ -526,15 +509,14 @@ public class <%=contractName%> {\n
         "with(obj){p.push('" +
        
         // Convert the template into pure JavaScript
-        str
-          .replace(/[\r\t\n]/g, " ")
-          .split("<%").join("\t")
-          .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-          .replace(/\t=(.*?)%>/g, "',$1,'")
-          .split("\t").join("');")
-          .split("%>").join("p.push('")
-          .split("\r").join("\\'")
-      + "');}return p.join('');");
+        str.replace(/[\r\t\n]/g, " ")
+   .replace(/'(?=[^%]*%})/g,"\t")
+   .split("'").join("\\'")
+   .split("\t").join("'")
+   .replace(/{%=(.+?)%}/g, "',$1,'")
+   .split("{%").join("');")
+   .split("%}").join("p.push('")
+   + "');}return p.join('');");
    
     // Provide some basic currying to the user
     return data ? fn( data ) : fn;
@@ -585,7 +567,18 @@ function buildTable() {
 	// build provider class
 	var tableSql = buildSql(contractName, tableName);
 
-	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val()}
+	// build out a projection map based on the field names
+	var projectionMap = "";
+	for (var x = 1; x <= varCount; x++) {
+		var rawField = $("#field"+x).val();
+		if (rawField != undefined) {
+			var fieldName = formatFieldName(rawField); 
+
+			projectionMap += '\tallColumnProjectionMap.put(\n'+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase()+',\n'+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase()+');\n'
+		}
+	}
+
+	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val(), projectionMap: projectionMap}
 	$("#provider_output").html(tmpl("provider_class_tmpl", providerData))
 }
 
@@ -730,7 +723,7 @@ function storeValue(keyName, keyValue) {
    </div>
    <div class="container">
    <div class="row clearfix">
-      <div class="span6">
+      <div class="span40">
          <div class="clearfix">
             <form class="form-horizontal">
                <fieldset>
