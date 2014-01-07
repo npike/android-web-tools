@@ -714,6 +714,20 @@ function bindChangeListener(field) {
 	
 }
 
+$.fn.selectText = function () {
+    return $(this).each(function (index, el) {
+        if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(el);
+            range.select();
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(el);
+            window.getSelection().addRange(range);
+        }
+    });
+}
+
 function storeValue(keyName, keyValue) {
 	console.log("storeValue "+keyName+"=>"+keyValue)
 	inputMap[keyName] = keyValue;
@@ -800,8 +814,10 @@ function storeValue(keyName, keyValue) {
                </div>
             </form>
             <h3>Contract Output</h3>
+            <a href="javascript:$('#output').selectText()">Select</a>
             <div id="output" style="background:#CCCCCC"></div>
             <h3>Provider Output</h3>
+            <a href="javascript:$('#provider_output').selectText()">Select</a>
             <div id="provider_output" style="background:#CCCCCC"/>
             </div>
          </div>
