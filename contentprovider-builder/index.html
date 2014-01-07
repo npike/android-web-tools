@@ -15,14 +15,14 @@
       <script src="../../assets/js/respond.min.js"></script>
     <![endif]-->
 	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script> 
-
+	<script type="text/javascript" src="js/jhash-2.1.js"></script> 
 
 <script type="text/html" id="new_field_tmpl">
 <div class="control-group">
  <label class="control-label" for="var<%=varCount%>">Field <%=varCount%></label>
- <div class="controls">
+ <div class="controls" id="<%=varCount%>">
     <input id="field<%=varCount%>" name="field<%=varCount%>" type="text" placeholder="" class="input-xlarge" required=""> 
-    <select id="field_type<%=varCount%>"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+    <select id="field_type<%=varCount%>"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field<%=varCount%>"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
  </div>
 </div>
 </script>
@@ -617,9 +617,110 @@ function buildSql(contractName, tableName) {
 
 	return tableSql;
 }
+
+var inputMap = {};
+
+varCount = 1;
+function init() {
+	// $("#input_cp_name").bind('input', function() {
+	// 	storeValue("input_cp_name", $("#input_cp_name").val())
+	// });   
+
+	// populate all the forms with data from URL and create new fields if required
+	console.log(jHash.root())
+	inputMap = jHash.val()  
+
+
+
+	bindChangeListener("#input_cp_name")
+	bindChangeListener("#input_cp_authority")
+	bindChangeListener("#table_name")
+	bindChangeListener("#table_sort")
+
+	// bindChangeListener("input[name=shouldSort]")
+	bindChangeListener("#field1")
+	bindChangeListener("#field_type1") 
+
+	$("#field_type1").change();
+
+	// does the inputMap contain fields pass field1 that we need to readd?
+	console.log("There are "+inputMap["fields"]+ " fields saved.")
+	for (var x = 1; x < inputMap["fields"]; x++) {
+		console.log("Restoring field "+(x+1))
+		$('#addField').each(addNewField)
+	}
+
+	// restore selected radioButton for sorting
+	$('input[name="shouldSort"]').each(function() { 
+
+		if ($(this).val() == inputMap["sortbyfield"]) { 
+			$(this).attr('checked', true);
+			return
+		}
+		
+	});
+
+	// setup change listener on radioGroup for row sorting
+	$('input[name="shouldSort"]').change(function(e) { // Select the radio input group
+
+	    // This returns the value of the checked radio button
+	    // which triggered the event.
+	    console.log( "shouldSort: " +$(this).val() ); 
+	 
+	    $('#sortByField').val($(this).val())
+	    jHash.val("sortByField", $(this).val())
+	});
+
+	
+}
+
+function bindChangeListener(field) {
+	if ($(field) == undefined) {
+		console.log("WARNING: Attempted to bind to undefined field "+field)
+		return
+	}
+	 if ($(field).is("select")) {
+	 	// restore this fields value if available in inputMap
+		if (inputMap[$(field).attr('id')] != undefined) {
+			$(field).val(inputMap[$(field).attr('id')])
+		}
+
+		$(field).change(function() {
+			storeValue($(this).attr('id'), $(this).val())
+		}); 
+	} else {
+		if (!$(field).is("input")) {
+			console.log("WARNING: Unsupported input type ("+$(field).prev().prop('tagName')+") to bind to on "+field+".")
+		}
+
+		if ($(field).attr('type') == "radio") {
+			$(field).change(function() {
+				storeValue($(this).attr('id'), $(this).val())
+			}); 
+		}
+
+		// restore this fields value if available in inputMap
+		if (inputMap[$(field).attr('id')] != undefined) {
+			$(field).val(inputMap[$(field).attr('id')])
+		}
+
+		$(field).bind('input', function() {
+			storeValue($(this).attr('id'), $(this).val())
+		}); 
+	}
+	
+}
+
+function storeValue(keyName, keyValue) {
+	console.log("storeValue "+keyName+"=>"+keyValue)
+	inputMap[keyName] = keyValue;
+ 
+	jHash.val(keyName, keyValue)
+}
+
 </script>
 </head>
-<body>
+<body onLoad="init()">
    <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
          <div class="container">
@@ -703,20 +804,41 @@ function buildSql(contractName, tableName) {
          </div>
       </div>
    </div>
+
+   <input type="hidden" id="sortByField" />
    <!-- /.container -->
    <script type="text/javascript">
-      varCount = 1;
+      
       //add a new node
-      $('#addField').on('click', function(){
+      $('#addField').on('click', addNewField);
+
+      function addNewField() {
       	varCount++; 
+      	jHash.val("fields", varCount)
       	var data={varCount: varCount}
       	$node = tmpl("new_field_tmpl", data)
       	$(this).parent().before($node);
+
+      	// bindChangeListener(".shouldSort")
+		bindChangeListener("#field"+varCount)
+		bindChangeListener("#field_type"+varCount)
+
       	$('form').on('click', '#remove', function(){ 
+      			// TODO delete values from input map and hash
+      			console.log("id: "+$(this).parent().attr("id"))
+      			deleteField($(this).parent().attr("id"))
        			$(this).parent().parent().remove();
        
       	});
-      });
+      }
+
+      function deleteField(fieldIndex) {
+      	inputMap["field"+fieldIndex] = undefined
+      	inputMap["field_type"+fieldIndex] = undefined
+
+      	jHash.val("field"+fieldIndex, undefined)
+      	jHash.val("field_type"+fieldIndex, undefined)
+      }
       
    </script>
    <!-- Include all compiled plugins (below), or include individual files as needed -->
