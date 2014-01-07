@@ -33,7 +33,7 @@
 
 <script type="text/html" id="provider_class_tmpl"> 
 <pre>
-package net.npike.android;\n\n
+package {%=packageName%};\n\n
 
 /**\n
  * Generated from {%=web_url%}\n
@@ -420,7 +420,7 @@ public class {%=providerName%} extends ContentProvider {\n
 
 <script type="text/html" id="contract_class_tmpl"> 
 <pre>
-package net.npike.android;\n\n
+package {%=packageName%};\n\n
 
 /**\n
  * Generated from {%=web_url%}\n
@@ -546,6 +546,11 @@ function buildTable() {
 	var contractName = $("#input_cp_name").val() + "Contract"
 	var tableName = capitaliseFirstLetter($("#table_name").val())
 
+	var packageName = "net.npike.android"
+	if ($("#input_package_name").val() != '') {
+		packageName = $("#input_package_name").val()
+	}
+
 	for (var x = 1; x <= varCount; x++) {
 		var rawField = $("#field"+x).val();
 		if (rawField != undefined) {
@@ -565,11 +570,11 @@ function buildTable() {
 	var sortDirection = $("#table_sort").val();
 
 
-	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("#input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection, web_url: window.location}
-	var outerClass = tmpl("contract_class_tmpl", data)
+	var data={contractName:contractName, modelName: $("#table_name").val(), tableName: tableName, authority: $("#input_cp_authority").val(), staticFields: tempOutput, sortColumn: sortColumn, sortDirection: sortDirection, web_url: window.location, packageName: packageName}
+	var contractClass = tmpl("contract_class_tmpl", data)
 
 
-	$("#output").html(outerClass)
+	$("#output").html(contractClass)
 
 
 
@@ -587,7 +592,7 @@ function buildTable() {
 		}
 	}
 
-	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val(), projectionMap: projectionMap, web_url: window.location}
+	var providerData = {tableName: tableName, providerName: $("#input_cp_name").val(), contractName: contractName, tableSql: tableSql, modelName: $("#table_name").val(), projectionMap: projectionMap, web_url: window.location, packageName: packageName}
 	$("#provider_output").html(tmpl("provider_class_tmpl", providerData))
 }
 
@@ -623,10 +628,7 @@ function buildSql(contractName, tableName) {
 var inputMap = {};
 
 varCount = 1;
-function init() {
-	// $("#input_cp_name").bind('input', function() {
-	// 	storeValue("input_cp_name", $("#input_cp_name").val())
-	// });   
+function init() { 
 
 	// populate all the forms with data from URL and create new fields if required
 	console.log(jHash.root())
@@ -634,12 +636,12 @@ function init() {
 
 
 
+	bindChangeListener("#input_package_name")
 	bindChangeListener("#input_cp_name")
 	bindChangeListener("#input_cp_authority")
 	bindChangeListener("#table_name")
 	bindChangeListener("#table_sort")
-
-	// bindChangeListener("input[name=shouldSort]")
+ 
 	bindChangeListener("#field1")
 	bindChangeListener("#field_type1") 
 
@@ -762,6 +764,12 @@ function storeValue(keyName, keyValue) {
                   <!-- Form Name -->
                   <legend>Content Provider Builder</legend>
                   <!-- Text input-->
+                  <div class="control-group">
+                     <label class="control-label" for="input_package_name">Package name (optional)</label>
+                     <div class="controls">
+                        <input id="input_package_name" name="input_package_name" type="text" placeholder="net.npike.android" class="input-xlarge"> 
+                     </div>
+                  </div>
                   <div class="control-group">
                      <label class="control-label" for="input_cp_name">Content Provider Name</label>
                      <div class="controls">
