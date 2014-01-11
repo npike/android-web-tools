@@ -21,7 +21,7 @@
 <div class="control-group"> 
  <div class="controls" id="{%=varCount%}">
     <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
-    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option></select><input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option></select> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique<input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
  </div>
 </div>
 </script>
@@ -620,7 +620,40 @@ function buildSql(contractName, tableName) {
 		}
 	}
 
-	tableSql += '		+ ");");'
+	// find all of the unique columns
+	var foundUnique = false;
+	for (var x = 1; x <= varCount; x++) {
+		var rawField = $("#field"+x).val();
+		if (rawField != undefined) {
+			var fieldName = formatFieldName(rawField); 
+			var isUnique = $("#field_unique"+x).prop("checked");
+
+			if (isUnique) {
+				if (!foundUnique) {
+					foundUnique = true;
+					tableSql +=  '		+ ", UNIQUE ('
+				} else {
+					tableSql += " , "
+				}
+				tableSql += "'\"+"+contractName+"."+tableName+".COLUMN_NAME_"+fieldName.toUpperCase() + "+\"'"
+				
+			}
+		}
+	}
+
+	if (foundUnique) {
+		// close out the unique list
+		tableSql += ")"
+
+		// add conflict resolution strategy
+		tableSql += " ON CONFLICT "+$("#conflict_resolution").val()	+  ');");'
+	} else {
+		tableSql += '		+ ");");'
+	}
+
+
+
+	
 
 	return tableSql;
 }
@@ -641,9 +674,11 @@ function init() {
 	bindChangeListener("#input_cp_authority")
 	bindChangeListener("#table_name")
 	bindChangeListener("#table_sort")
+	bindChangeListener("#conflict_resolution")
  
 	bindChangeListener("#field1")
 	bindChangeListener("#field_type1") 
+	bindChangeListener("#field_unique1")
 
 	$("#field_type1").change();
 
@@ -703,23 +738,42 @@ function bindChangeListener(field) {
 		}); 
 	} else {
 		if (!$(field).is("input")) {
-			console.log("WARNING: Unsupported input type ("+$(field).prev().prop('tagName')+") to bind to on "+field+".")
+			console.log("WARNING: Unsupported input type ("+$(field).prop('tagName')+") to bind to on "+field+".")
 		}
+
+
+
+		// restore this fields value if available in inputMap
+		if (inputMap[$(field).attr('id')] != undefined) {
+			$(field).val(inputMap[$(field).attr('id')])
+		} 
+		
+		console.log($(field).attr('type'))
 
 		if ($(field).attr('type') == "radio") {
 			$(field).change(function() {
 				storeValue($(this).attr('id'), $(this).val())
 			}); 
+		} else if ($(field).attr('type') == "checkbox") { 
+			console.log(inputMap[$(field).attr('id')]);
+			if (inputMap[$(field).attr('id')] != undefined) {
+				$(field).prop('checked', "checked");
+			}
+			$(field).change(function() {
+				if ($(this).prop('checked')) {
+					storeValue($(this).attr('id'), 1)
+				} else {
+					jHash.val($(this).attr('id'), undefined)
+				}
+				
+			});
+		} else {
+			$(field).bind('input', function() {
+				storeValue($(this).attr('id'), $(this).val())
+			});
 		}
 
-		// restore this fields value if available in inputMap
-		if (inputMap[$(field).attr('id')] != undefined) {
-			$(field).val(inputMap[$(field).attr('id')])
-		}
-
-		$(field).bind('input', function() {
-			storeValue($(this).attr('id'), $(this).val())
-		}); 
+		 
 	}
 	
 }
@@ -785,6 +839,7 @@ function storeValue(keyName, keyValue) {
                   </div> 
                   <!-- Form Name -->
                   <legend>Table info</legend>
+       
                   <!-- Text input-->
                   <div class="control-group">
                      <label class="control-label" for="table_name">Table name</label>
@@ -803,6 +858,12 @@ function storeValue(keyName, keyValue) {
                      </div>
                   </div>
                   <div class="control-group">
+                     <label class="control-label" for="conflict_resolution">Conflict Resolution Strategy</label>
+                     <div class="controls">
+                        <input id="conflict_resolution" name="conflict_resolution" type="text" value="IGNORE" class="input-xlarge" required=""> 
+                     </div>
+                  </div>
+                  <div class="control-group">
                      
                      <div class="controls">
                         <input id="field1" name="field1" type="text" placeholder="" class="input-xlarge" required=""> 
@@ -810,7 +871,7 @@ function storeValue(keyName, keyValue) {
                            <option value="INTEGER">integer</option>
                            <option value="TEXT">text</option>
                         </select>
-                        <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+                         <input type="checkbox" id="field_unique1" autocomplete="off"/> Unique <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
                      </div>
                   </div>
                   <!-- Button -->
@@ -857,6 +918,7 @@ function storeValue(keyName, keyValue) {
       	// bindChangeListener(".shouldSort")
 		bindChangeListener("#field"+varCount)
 		bindChangeListener("#field_type"+varCount)
+		bindChangeListener("#field_unique"+varCount)
 
       	$('form').on('click', '#remove', function(){ 
       			// TODO delete values from input map and hash
@@ -870,9 +932,11 @@ function storeValue(keyName, keyValue) {
       function deleteField(fieldIndex) {
       	inputMap["field"+fieldIndex] = undefined
       	inputMap["field_type"+fieldIndex] = undefined
+      	inputMap["field_unique"+fieldIndex] = undefined
 
       	jHash.val("field"+fieldIndex, undefined)
       	jHash.val("field_type"+fieldIndex, undefined)
+      	jHash.val("field_unique"+fieldIndex, undefined)
       }
       
    </script>
