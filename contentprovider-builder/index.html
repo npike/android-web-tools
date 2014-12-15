@@ -21,7 +21,7 @@
 <div class="control-group"> 
  <div class="controls" id="{%=varCount%}">
     <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
-    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option></select> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique<input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option><option value="REAL">real</option></select> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique<input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
  </div>
 </div>
 </script>
@@ -870,6 +870,7 @@ function storeValue(keyName, keyValue) {
                         <select id="field_type1">
                            <option value="INTEGER">integer</option>
                            <option value="TEXT">text</option>
+                           <option value="REAL">real</option>
                         </select>
                          <input type="checkbox" id="field_unique1" autocomplete="off"/> Unique <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
                      </div>
