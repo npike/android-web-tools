@@ -22,6 +22,7 @@
  <div class="controls" id="{%=varCount%}">
     <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
     <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option><option value="REAL">real</option></select>
+    <input id="field_defaultvalue{%=varCount%}" name="field_defaultvalue{%=varCount%}" type="text" placeholder="default value" class="input-xlarge"> 
     <button id="remove" name="remove" class="btn btn-danger">Remove</button>
     <br /> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique <input type="checkbox" id="field_notnull{%=varCount%}" autocomplete="off"/> Not null <input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this 
  </div>
@@ -611,12 +612,21 @@ function buildSql(contractName, tableName) {
 		if (rawField != undefined) {
 			var fieldName = formatFieldName(rawField); 
 			var fieldType = $("#field_type"+x).val();
+			var defaultValue = $("#field_defaultvalue"+x).val();
 
 			tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType;
 
 			// not null support
 			if ($("#field_notnull"+x).prop("checked")) {
 				tableSql += ' NOT NULL'
+			}
+
+			if (defaultValue) {
+				if (fieldType === "TEXT") {
+					defaultValue = "'"+defaultValue+"'";
+				}
+
+				tableSql += ' DEFAULT ' + defaultValue
 			}
 
 			if (x < varCount) {
@@ -687,6 +697,8 @@ function init() {
 	bindChangeListener("#field_type1") 
 	bindChangeListener("#field_unique1")
 	bindChangeListener("#field_notnull1")
+	bindChangeListener("#field_defaultvalue1")
+
 
 	$("#field_type1").change();
 
@@ -880,6 +892,8 @@ function storeValue(keyName, keyValue) {
                            <option value="TEXT">text</option>
                            <option value="REAL">real</option>
                         </select>
+                        <input id="field_defaultvalue1" name="field_defaultvalue1" type="text" placeholder="default value" class="input-xlarge"> 
+
                         <button id="remove" name="remove" class="btn btn-danger">Remove</button>
                         <br />
                          <input type="checkbox" id="field_unique1" autocomplete="off"/> Unique 
@@ -933,6 +947,7 @@ function storeValue(keyName, keyValue) {
 		bindChangeListener("#field_type"+varCount)
 		bindChangeListener("#field_unique"+varCount)
 		bindChangeListener("#field_notnull"+varCount)
+		bindChangeListener("#field_defaultvalue"+varCount)
 
       	$('form').on('click', '#remove', function(){ 
       			// TODO delete values from input map and hash
@@ -948,11 +963,14 @@ function storeValue(keyName, keyValue) {
       	inputMap["field_type"+fieldIndex] = undefined
       	inputMap["field_unique"+fieldIndex] = undefined
       	inputMap["field_notnull"+fieldIndex] = undefined
+      	inputMap["field_defaultvalue"+fieldIndex] = undefined
+
 
       	jHash.val("field"+fieldIndex, undefined)
       	jHash.val("field_type"+fieldIndex, undefined)
       	jHash.val("field_unique"+fieldIndex, undefined)
       	jHash.val("field_notnull"+fieldIndex, undefined)
+      	jHash.val("field_defaultvalue"+fieldIndex, undefined)
 
       }
       
