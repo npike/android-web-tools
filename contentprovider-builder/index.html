@@ -21,7 +21,9 @@
 <div class="control-group"> 
  <div class="controls" id="{%=varCount%}">
     <input id="field{%=varCount%}" name="field{%=varCount%}" type="text" placeholder="" class="input-xlarge" required=""> 
-    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option><option value="REAL">real</option></select> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique<input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+    <select id="field_type{%=varCount%}"><option value="INTEGER">integer</option><option value="TEXT">text</option><option value="REAL">real</option></select>
+    <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+    <br /> <input type="checkbox" id="field_unique{%=varCount%}" autocomplete="off"/> Unique <input type="checkbox" id="field_notnull{%=varCount%}" autocomplete="off"/> Not null <input type="radio" name="shouldSort" value="field{%=varCount%}"/> Sort on this 
  </div>
 </div>
 </script>
@@ -612,6 +614,11 @@ function buildSql(contractName, tableName) {
 
 			tableSql += '		+ '+contractName+'.'+tableName+'.COLUMN_NAME_'+fieldName.toUpperCase() + ' + " '+fieldType;
 
+			// not null support
+			if ($("#field_notnull"+x).prop("checked")) {
+				tableSql += ' NOT NULL'
+			}
+
 			if (x < varCount) {
 				tableSql +=', '
 			}
@@ -679,6 +686,7 @@ function init() {
 	bindChangeListener("#field1")
 	bindChangeListener("#field_type1") 
 	bindChangeListener("#field_unique1")
+	bindChangeListener("#field_notnull1")
 
 	$("#field_type1").change();
 
@@ -872,7 +880,11 @@ function storeValue(keyName, keyValue) {
                            <option value="TEXT">text</option>
                            <option value="REAL">real</option>
                         </select>
-                         <input type="checkbox" id="field_unique1" autocomplete="off"/> Unique <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+                        <button id="remove" name="remove" class="btn btn-danger">Remove</button>
+                        <br />
+                         <input type="checkbox" id="field_unique1" autocomplete="off"/> Unique 
+                         <input type="checkbox" id="field_notnull1" autocomplete="off"/> Not null 
+                         <input type="radio" name="shouldSort" value="field1" checked="true"/> Sort on this 
                      </div>
                   </div>
                   <!-- Button -->
@@ -920,6 +932,7 @@ function storeValue(keyName, keyValue) {
 		bindChangeListener("#field"+varCount)
 		bindChangeListener("#field_type"+varCount)
 		bindChangeListener("#field_unique"+varCount)
+		bindChangeListener("#field_notnull"+varCount)
 
       	$('form').on('click', '#remove', function(){ 
       			// TODO delete values from input map and hash
@@ -934,10 +947,13 @@ function storeValue(keyName, keyValue) {
       	inputMap["field"+fieldIndex] = undefined
       	inputMap["field_type"+fieldIndex] = undefined
       	inputMap["field_unique"+fieldIndex] = undefined
+      	inputMap["field_notnull"+fieldIndex] = undefined
 
       	jHash.val("field"+fieldIndex, undefined)
       	jHash.val("field_type"+fieldIndex, undefined)
       	jHash.val("field_unique"+fieldIndex, undefined)
+      	jHash.val("field_notnull"+fieldIndex, undefined)
+
       }
       
    </script>
