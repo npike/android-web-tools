@@ -164,7 +164,7 @@ public class {%=providerName%} extends ContentProvider {\n
 		// Does the delete based on the incoming URI pattern.\n
 		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
 		case {%=tableName.toUpperCase()%}:\n
-			// If the incoming pattern matches the general pattern for makes,\n
+			// If the incoming pattern matches the general pattern for {%=modelName%}s,\n
 			// does a delete based on the\n
 			// incoming "where" columns and arguments.\n
 			count = db.delete({%=contractName%}.{%=modelName%}.TABLE_NAME, where,\n
@@ -184,10 +184,10 @@ public class {%=providerName%} extends ContentProvider {\n
 		 */\n
 		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
 		case {%=tableName.toUpperCase()%}:\n
-			// If the pattern is for makess, returns the general content type.\n
+			// If the pattern is for {%=modelName%}s, returns the general content type.\n
 			return {%=contractName%}.{%=modelName%}.CONTENT_TYPE;\n
 		case {%=tableName.toUpperCase()%}_ID:\n
-			// If the pattern is for make IDs, returns the make ID content\n
+			// If the pattern is for {%=modelName%} IDs, returns the {%=modelName%} ID content\n
 			// type.\n
 			return {%=contractName%}.{%=modelName%}.CONTENT_ITEM_TYPE;\n
 \n
@@ -200,7 +200,7 @@ public class {%=providerName%} extends ContentProvider {\n
 	public Uri insert(final Uri uri, final ContentValues initialValues) {\n
 		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
 		case {%=tableName.toUpperCase()%}:\n
-			// insert a specific make\n
+			// insert a specific {%=modelName%}\n
 			return insert{%=modelName%}(uri, initialValues);\n
 		default:\n
 			throw new IllegalArgumentException("Unknown URI " + uri);\n
@@ -234,7 +234,7 @@ public class {%=providerName%} extends ContentProvider {\n
 				SQLiteDatabase.CONFLICT_IGNORE);\n
 		// If the insert succeeded, the row ID exists.\n
 		if (rowId > 0) {\n
-			// Creates a URI with the make ID pattern and the new row ID\n
+			// Creates a URI with the {%=modelName%} ID pattern and the new row ID\n
 			// appended to it.\n
 			final Uri inserUri = ContentUris.withAppendedId(\n
 					{%=contractName%}.{%=tableName%}.CONTENT_ID_URI_BASE, rowId);\n
@@ -267,7 +267,7 @@ public class {%=providerName%} extends ContentProvider {\n
 		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
 		case {%=tableName.toUpperCase()%}:\n
 		case {%=tableName.toUpperCase()%}_ID:\n
-			// insert a specific make\n
+			// insert a specific {%=modelName%}\n
 			return query{%=modelName%}(uri, projection, selection, selectionArgs,\n
 					sortOrder);\n
 		default:\n
@@ -294,7 +294,7 @@ public class {%=providerName%} extends ContentProvider {\n
 			break;\n
 		case {%=modelName.toUpperCase()%}_ID:\n
 			// If the incoming URI is for a single item identified by its ID,\n
-			// appends "_ID = <makeID>"\n
+			// appends "_ID = <{%=modelName%}ID>"\n
 			// to the where clause, so that it selects that single item\n
 			qb.appendWhere(BaseColumns._ID\n
 					+ "="\n
@@ -322,7 +322,7 @@ public class {%=providerName%} extends ContentProvider {\n
 		switch ({%=providerName%}.uriMatcher.match(uri)) {\n
 		case {%=tableName.toUpperCase()%}:\n
 		case {%=tableName.toUpperCase()%}_ID:\n
-			// insert a specific make\n
+			// insert a specific {%=modelName%}\n
 			return update{%=modelName%}(uri, values, selection, selectionArgs);\n
 		default:\n
 			return 0;\n
@@ -464,7 +464,7 @@ public class {%=contractName%} {\n
 		 */\n
 		public static final String TABLE_NAME = "{%=tableName%}";\n
 		/**\n
-		 * 0-relative position of a make ID segment in the path part of a make\n
+		 * 0-relative position of a {%=modelName%} ID segment in the path part of a {%=modelName%}\n
 		 * ID URI\n
 		 */\n
 		public static final int ID_PATH_POSITION = 1;\n
